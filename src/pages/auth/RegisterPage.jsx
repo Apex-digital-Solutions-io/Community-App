@@ -57,12 +57,11 @@ export default function RegisterPage() {
       const { error: insertError } = await supabase
         .from('user_requests')
         .insert({
-          first_name: formData.firstName.trim(),
-          last_name: formData.lastName.trim(),
-          email: formData.email.trim(),
-          password: formData.password,
-          state: formData.state.trim(),
-          invited_by: formData.invitedBy.trim(),
+          user_request_first_name: formData.firstName.trim(),
+          user_request_last_name: formData.lastName.trim(),
+          user_request_email: formData.email.trim(),
+          user_request_state: formData.state.trim(),
+          user_request_invited_by: formData.invitedBy.trim(),
           user_request_status: 'New Request',
         });
 

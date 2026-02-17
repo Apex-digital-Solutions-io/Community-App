@@ -95,22 +95,22 @@ export default function ManageUsersPage() {
   }
 
   async function handleApproveRequest(request) {
-    setActionLoading(request.id);
+    setActionLoading(request.user_request_id);
     try {
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: request.email,
-        password: request.password,
-        email_confirm: true,
+      // Sign up creates an auth user and sends a confirmation email
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: request.user_request_email,
+        password: crypto.randomUUID(), // temporary password; user resets via email
       });
 
       if (authError) throw authError;
 
       const { error: userError } = await supabase.from('users').insert({
         user_id: authData.user.id,
-        user_first_name: request.first_name,
-        user_last_name: request.last_name,
-        user_email: request.email,
-        user_name: request.first_name + ' ' + request.last_name,
+        user_first_name: request.user_request_first_name,
+        user_last_name: request.user_request_last_name,
+        user_email: request.user_request_email,
+        user_name: request.user_request_first_name + ' ' + request.user_request_last_name,
         user_role: ROLES.USER,
         user_start_date: new Date().toISOString().split('T')[0],
       });
@@ -120,11 +120,11 @@ export default function ManageUsersPage() {
       const { error: statusError } = await supabase
         .from('user_requests')
         .update({ user_request_status: 'Approved' })
-        .eq('id', request.id);
+        .eq('user_request_id', request.user_request_id);
 
       if (statusError) throw statusError;
 
-      showMessage(`${request.first_name} ${request.last_name} has been approved.`);
+      showMessage(`${request.user_request_first_name} ${request.user_request_last_name} has been approved.`);
       fetchRequests();
       fetchUsers();
     } catch (err) {
@@ -134,16 +134,16 @@ export default function ManageUsersPage() {
   }
 
   async function handleDenyRequest(request) {
-    setActionLoading(request.id);
+    setActionLoading(request.user_request_id);
     const { error } = await supabase
       .from('user_requests')
       .update({ user_request_status: 'Denied' })
-      .eq('id', request.id);
+      .eq('user_request_id', request.user_request_id);
 
     if (error) {
       showMessage('Failed to deny request: ' + error.message, 'error');
     } else {
-      showMessage(`Request from ${request.first_name} ${request.last_name} has been denied.`);
+      showMessage(`Request from ${request.user_request_first_name} ${request.user_request_last_name} has been denied.`);
       fetchRequests();
     }
     setActionLoading(null);
@@ -222,31 +222,31 @@ export default function ManageUsersPage() {
           ) : (
             <div style={styles.requestsGrid}>
               {requests.map((req) => (
-                <div key={req.id} style={styles.requestCard}>
+                <div key={req.user_request_id} style={styles.requestCard}>
                   <div style={styles.requestInfo}>
                     <p style={styles.requestName}>
-                      {req.first_name} {req.last_name}
+                      {req.user_request_first_name} {req.user_request_last_name}
                     </p>
-                    <p style={styles.requestDetail}>{req.email}</p>
-                    {req.state && (
-                      <p style={styles.requestDetail}>State: {req.state}</p>
+                    <p style={styles.requestDetail}>{req.user_request_email}</p>
+                    {req.user_request_state && (
+                      <p style={styles.requestDetail}>State: {req.user_request_state}</p>
                     )}
-                    {req.invited_by && (
-                      <p style={styles.requestDetail}>Invited by: {req.invited_by}</p>
+                    {req.user_request_invited_by && (
+                      <p style={styles.requestDetail}>Invited by: {req.user_request_invited_by}</p>
                     )}
                   </div>
                   <div style={styles.requestActions}>
                     <button
                       style={styles.approveBtn}
                       onClick={() => handleApproveRequest(req)}
-                      disabled={actionLoading === req.id}
+                      disabled={actionLoading === req.user_request_id}
                     >
-                      {actionLoading === req.id ? 'Processing...' : 'Approve'}
+                      {actionLoading === req.user_request_id ? 'Processing...' : 'Approve'}
                     </button>
                     <button
                       style={styles.denyBtn}
                       onClick={() => handleDenyRequest(req)}
-                      disabled={actionLoading === req.id}
+                      disabled={actionLoading === req.user_request_id}
                     >
                       Deny
                     </button>
