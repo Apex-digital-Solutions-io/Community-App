@@ -39,13 +39,13 @@ export function AuthProvider({ children }) {
       .from('users')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('Error fetching profile:', error);
       setProfile(null);
     } else {
-      setProfile(data);
+      setProfile(data); // null when no row exists yet
     }
     setLoading(false);
   }
