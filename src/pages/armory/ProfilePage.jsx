@@ -21,6 +21,23 @@ const AVATAR_FIELD_LABELS = {
 
 const AVATAR_FIELDS = Object.keys(AVATAR_OPTIONS);
 
+// Mapping from AVATAR_OPTIONS keys to DB column names
+const AVATAR_KEY_TO_DB = {
+  Skin_Color: 'skin_color',
+  Top: 'top',
+  HairColor: 'hair_color',
+  Accessories: 'accessories',
+  FacialHair: 'facial_hair',
+  FacialHairColor: 'facial_hair_color',
+  Clothes: 'clothes',
+  ClotheColor: 'clothe_color',
+  Graphic: 'graphic',
+  Eyes: 'eyes',
+  Eyebrow: 'eyebrow',
+  Mouth: 'mouth',
+  Background_or_Transparent: 'background_or_transparent',
+};
+
 function getDefaultAvatarState() {
   const state = {};
   for (const field of AVATAR_FIELDS) {
@@ -50,23 +67,24 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!profile) return;
 
-    setPhotoSource(profile.User_Photo_Source || 'Avatar');
-    setFirstName(profile.first_name || '');
-    setLastName(profile.last_name || '');
-    setDisplayName(profile.User_Name || '');
-    setNotificationEmail(profile.notification_email || '');
-    setState(profile.state || '');
-    setClan(profile.clan || '');
-    setFaithDate(profile.faith_profession_date || '');
+    setPhotoSource(profile.user_photo_source || 'Avatar');
+    setFirstName(profile.user_first_name || '');
+    setLastName(profile.user_last_name || '');
+    setDisplayName(profile.user_name || '');
+    setNotificationEmail(profile.user_notification_email || '');
+    setState(profile.user_state || '');
+    setClan(profile.user_clan || '');
+    setFaithDate(profile.user_faith_profession || '');
 
     const avatarState = {};
     for (const field of AVATAR_FIELDS) {
-      avatarState[field] = profile[field] || AVATAR_OPTIONS[field][0];
+      const dbCol = AVATAR_KEY_TO_DB[field];
+      avatarState[field] = profile[dbCol] || AVATAR_OPTIONS[field][0];
     }
     setAvatarOptions(avatarState);
 
-    if (profile.User_Photo_Source === 'Photo' && profile.photo_url) {
-      setPhotoPreviewUrl(profile.photo_url);
+    if (profile.user_photo_source === 'Photo' && profile.user_photo_upload) {
+      setPhotoPreviewUrl(profile.user_photo_upload);
     }
   }, [profile]);
 
@@ -109,7 +127,7 @@ export default function ProfilePage() {
     setErrorMessage('');
 
     try {
-      let uploadedPhotoUrl = profile?.photo_url || '';
+      let uploadedPhotoUrl = profile?.user_photo_upload || '';
 
       if (photoSource === 'Photo' && photoFile) {
         const fileExt = photoFile.name.split('.').pop();
@@ -131,22 +149,23 @@ export default function ProfilePage() {
       }
 
       const updateData = {
-        User_Photo_Source: photoSource,
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-        User_Name: displayName.trim(),
-        notification_email: notificationEmail.trim(),
-        state: state.trim(),
-        clan: clan.trim(),
-        faith_profession_date: faithDate || null,
+        user_photo_source: photoSource,
+        user_first_name: firstName.trim(),
+        user_last_name: lastName.trim(),
+        user_name: displayName.trim(),
+        user_notification_email: notificationEmail.trim(),
+        user_state: state.trim(),
+        user_clan: clan.trim(),
+        user_faith_profession: faithDate || null,
       };
 
       for (const field of AVATAR_FIELDS) {
-        updateData[field] = avatarOptions[field];
+        const dbCol = AVATAR_KEY_TO_DB[field];
+        updateData[dbCol] = avatarOptions[field];
       }
 
       if (photoSource === 'Photo') {
-        updateData.photo_url = uploadedPhotoUrl;
+        updateData.user_photo_upload = uploadedPhotoUrl;
       }
 
       const { error: updateError } = await supabase
