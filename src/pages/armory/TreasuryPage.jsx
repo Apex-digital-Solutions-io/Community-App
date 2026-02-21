@@ -28,8 +28,8 @@ export default function TreasuryPage() {
             .from('coin_relationships')
             .select(`
               *,
-              edge_keeper:edge_keeper_id ( user_id, first_name, last_name, User_Name ),
-              forge_keeper:forge_keeper_id ( user_id, first_name, last_name, User_Name )
+              edge_keeper:coin_relationship_edge_keeper_id ( user_id, user_first_name, user_last_name, user_name ),
+              forge_keeper:coin_relationship_forge_keeper_id ( user_id, user_first_name, user_last_name, user_name )
             `)
             .eq('coin_user_id', profile.user_id)
             .order('coin_relationship_date_rewarded', { ascending: false }),
@@ -102,9 +102,9 @@ export default function TreasuryPage() {
 
   function getKeeperName(keeper) {
     if (!keeper) return '--';
-    if (keeper.User_Name) return keeper.User_Name;
-    if (keeper.first_name || keeper.last_name) {
-      return `${keeper.first_name || ''} ${keeper.last_name || ''}`.trim();
+    if (keeper.user_name) return keeper.user_name;
+    if (keeper.user_first_name || keeper.user_last_name) {
+      return `${keeper.user_first_name || ''} ${keeper.user_last_name || ''}`.trim();
     }
     return '--';
   }

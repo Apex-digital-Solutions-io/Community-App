@@ -15,8 +15,8 @@ const MEMBER_LINKS = [
 ];
 
 const ADMIN_LINKS = [
-  { label: 'Manage Users',   path: '/armory/admin/manage-users',  icon: ManageUsersIcon },
-  { label: 'Award Coins',    path: '/armory/admin/award-coins',   icon: AwardCoinsIcon },
+  { label: 'Manage Users',   path: '/armory/admin/users',         icon: ManageUsersIcon },
+  { label: 'Award Coins',    path: '/armory/admin/award',         icon: AwardCoinsIcon },
   { label: 'Relationships',  path: '/armory/admin/relationships', icon: RelationshipsIcon },
 ];
 
