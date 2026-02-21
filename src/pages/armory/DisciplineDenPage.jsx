@@ -41,7 +41,7 @@ function displayName(u) {
 /*  Main Component                                                     */
 /* ================================================================== */
 export default function DisciplineDenPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
 
   /* ---- posts state ---- */
   const [posts, setPosts] = useState([]);
@@ -333,6 +333,24 @@ export default function DisciplineDenPage() {
   }
 
   /* ================================================================ */
+  /*  Delete post                                                      */
+  /* ================================================================ */
+  async function handleDeletePost(postId) {
+    if (!window.confirm('Are you sure you want to delete this post?')) return;
+
+    const { error } = await supabase
+      .from('discipline_den')
+      .delete()
+      .eq('discipline_den_id', postId);
+
+    if (error) {
+      console.error('Error deleting post:', error);
+    } else {
+      setPosts((prev) => prev.filter((p) => p.discipline_den_id !== postId));
+    }
+  }
+
+  /* ================================================================ */
   /*  Helpers for like state                                           */
   /* ================================================================ */
   function postLikeCount(postId) {
@@ -494,6 +512,15 @@ export default function DisciplineDenPage() {
                         </div>
                       </div>
                     </div>
+                    {(post.discipline_den_user === user?.id || isAdmin) && (
+                      <button
+                        onClick={() => handleDeletePost(postId)}
+                        style={styles.deleteButton}
+                        title="Delete post"
+                      >
+                        &times;
+                      </button>
+                    )}
                   </div>
 
                   {/* Post body */}
@@ -823,6 +850,18 @@ const styles = {
     backgroundColor: 'var(--color-bg, #ffffff)',
     borderRadius: '12px',
     border: '1px solid var(--color-border, #e5e7eb)',
+  },
+
+  deleteButton: {
+    background: 'none',
+    border: 'none',
+    fontSize: '22px',
+    lineHeight: 1,
+    color: 'var(--color-text-muted, #6b7280)',
+    cursor: 'pointer',
+    padding: '4px 8px',
+    borderRadius: '6px',
+    transition: 'color 0.15s ease, background-color 0.15s ease',
   },
 
   /* Post Card */
