@@ -74,7 +74,7 @@ export default function ScriptureMemoryPage() {
         scripture_verse_end: formData.verse_end ? parseInt(formData.verse_end, 10) : null,
         scripture_verse: formData.verse_text,
         scripture_tag: tagsArray,
-        due_date: formData.due_date || null,
+        scripture_due_date: formData.due_date || null,
         scripture_hide_verse: false,
       };
 
@@ -104,10 +104,10 @@ export default function ScriptureMemoryPage() {
       const { error: deleteError } = await supabase
         .from('scripture_memory')
         .delete()
-        .eq('id', id);
+        .eq('scripture_id', id);
 
       if (deleteError) throw deleteError;
-      setEntries((prev) => prev.filter((entry) => entry.id !== id));
+      setEntries((prev) => prev.filter((entry) => entry.scripture_id !== id));
     } catch (err) {
       console.error('Error deleting scripture entry:', err);
       setError('Failed to delete scripture entry.');
@@ -120,11 +120,11 @@ export default function ScriptureMemoryPage() {
       const { error: updateError } = await supabase
         .from('scripture_memory')
         .update({ scripture_hide_verse: newValue })
-        .eq('id', entry.id);
+        .eq('scripture_id', entry.scripture_id);
 
       if (updateError) throw updateError;
       setEntries((prev) =>
-        prev.map((e) => (e.id === entry.id ? { ...e, scripture_hide_verse: newValue } : e))
+        prev.map((e) => (e.id === entry.scripture_id ? { ...e, scripture_hide_verse: newValue } : e))
       );
     } catch (err) {
       console.error('Error toggling verse visibility:', err);
@@ -167,9 +167,9 @@ export default function ScriptureMemoryPage() {
     let result = [...entries];
 
     if (filter === 'Active') {
-      result = result.filter((e) => !isComplete(e.due_date));
+      result = result.filter((e) => !isComplete(e.scripture_due_date));
     } else if (filter === 'Complete') {
-      result = result.filter((e) => isComplete(e.due_date));
+      result = result.filter((e) => isComplete(e.scripture_due_date));
     }
 
     if (bookFilter !== 'All Books') {
@@ -178,10 +178,10 @@ export default function ScriptureMemoryPage() {
 
     result.sort((a, b) => {
       if (sortBy === 'due_date') {
-        if (!a.due_date && !b.due_date) return 0;
-        if (!a.due_date) return 1;
-        if (!b.due_date) return -1;
-        return new Date(a.due_date) - new Date(b.due_date);
+        if (!a.scripture_due_date && !b.scripture_due_date) return 0;
+        if (!a.scripture_due_date) return 1;
+        if (!b.scripture_due_date) return -1;
+        return new Date(a.scripture_due_date) - new Date(b.scripture_due_date);
       }
       if (sortBy === 'book') {
         const bookCompare = (a.scripture_book || '').localeCompare(b.scripture_book || '');
@@ -306,8 +306,8 @@ export default function ScriptureMemoryPage() {
         ) : (
           <div style={styles.grid}>
             {filteredEntries.map((entry) => {
-              const dueStatus = getDueStatus(entry.due_date);
-              const complete = isComplete(entry.due_date);
+              const dueStatus = getDueStatus(entry.scripture_due_date);
+              const complete = isComplete(entry.scripture_due_date);
               const bibleUrl = getBibleUrl(
                 entry.scripture_book,
                 entry.scripture_chapter,
@@ -316,7 +316,7 @@ export default function ScriptureMemoryPage() {
               );
 
               return (
-                <div key={entry.id} style={styles.card}>
+                <div key={entry.scripture_id} style={styles.card}>
                   {/* Card Header */}
                   <div style={styles.cardHeader}>
                     <div style={styles.cardTitleRow}>
@@ -336,7 +336,7 @@ export default function ScriptureMemoryPage() {
                     </div>
                     <button
                       style={styles.deleteButton}
-                      onClick={() => handleDelete(entry.id)}
+                      onClick={() => handleDelete(entry.scripture_id)}
                       aria-label={`Delete ${getReference(entry)}`}
                       title="Delete entry"
                     >
@@ -378,8 +378,8 @@ export default function ScriptureMemoryPage() {
                         color: dueStatusColors[dueStatus],
                       }}
                     >
-                      {entry.due_date
-                        ? `Due: ${formatDueDate(entry.due_date)}`
+                      {entry.scripture_due_date
+                        ? `Due: ${formatDueDate(entry.scripture_due_date)}`
                         : 'No due date'}
                     </span>
                     {dueStatus === 'overdue' && !complete && (
