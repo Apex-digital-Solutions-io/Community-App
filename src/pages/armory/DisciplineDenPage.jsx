@@ -81,7 +81,7 @@ export default function DisciplineDenPage() {
     } else {
       setPosts(data || []);
       // Pre-fetch likes for all returned posts
-      const ids = (data || []).map((p) => p.id);
+      const ids = (data || []).map((p) => p.discipline_den_id);
       if (ids.length) {
         const { data: allLikes } = await supabase
           .from('discipline_den_likes')
@@ -114,23 +114,23 @@ export default function DisciplineDenPage() {
         '*, users!discipline_den_comment_user_id(user_id, user_name, user_first_name, user_last_name)'
       )
       .eq('discipline_den_comment_parent_ref', postId)
-      .order('created_at', { ascending: true });
+      .order('discipline_den_comment_date', { ascending: true });
 
     if (error) {
       console.error('Error fetching comments:', error);
     } else {
       setCommentsMap((prev) => ({ ...prev, [postId]: data || [] }));
       // Fetch likes for each comment
-      const commentIds = (data || []).map((c) => c.id);
+      const commentIds = (data || []).map((c) => c.discipline_den_comment_id);
       if (commentIds.length) {
         const { data: cLikes } = await supabase
           .from('discipline_den_likes')
           .select('*')
-          .in('comment_parent_ref', commentIds);
+          .in('discipline_den_likes_comment_parent_ref', commentIds);
         if (cLikes) {
           const grouped = {};
           cLikes.forEach((l) => {
-            const key = l.comment_parent_ref;
+            const key = l.discipline_den_likes_comment_parent_ref;
             if (!grouped[key]) grouped[key] = [];
             grouped[key].push(l);
           });
@@ -172,7 +172,7 @@ export default function DisciplineDenPage() {
         const postRef =
           payload.new?.discipline_den_post_ref || payload.old?.discipline_den_post_ref;
         const commentRef =
-          payload.new?.comment_parent_ref || payload.old?.comment_parent_ref;
+          payload.new?.discipline_den_likes_comment_parent_ref || payload.old?.discipline_den_likes_comment_parent_ref;
         if (postRef) {
           fetchLikesForPost(postRef);
         }
@@ -181,7 +181,7 @@ export default function DisciplineDenPage() {
           supabase
             .from('discipline_den_likes')
             .select('*')
-            .eq('comment_parent_ref', commentRef)
+            .eq('discipline_den_likes_comment_parent_ref', commentRef)
             .then(({ data }) => {
               setCommentLikesMap((prev) => ({ ...prev, [commentRef]: data || [] }));
             });
@@ -260,15 +260,15 @@ export default function DisciplineDenPage() {
     if (!user) return;
     const postLikes = likesMap[postId] || [];
     const existing = postLikes.find(
-      (l) => l.discipline_den_like_user === user.id && !l.comment_parent_ref
+      (l) => l.discipline_den_comment_user_id === user.id && !l.discipline_den_likes_comment_parent_ref
     );
 
     if (existing) {
-      await supabase.from('discipline_den_likes').delete().eq('id', existing.id);
+      await supabase.from('discipline_den_likes').delete().eq('discipline_den_likes_id', existing.discipline_den_likes_id);
     } else {
       await supabase.from('discipline_den_likes').insert({
         discipline_den_post_ref: postId,
-        discipline_den_like_user: user.id,
+        discipline_den_comment_user_id: user.id,
       });
     }
     fetchLikesForPost(postId);
@@ -280,22 +280,22 @@ export default function DisciplineDenPage() {
   async function handleToggleCommentLike(commentId, postId) {
     if (!user) return;
     const cLikes = commentLikesMap[commentId] || [];
-    const existing = cLikes.find((l) => l.discipline_den_like_user === user.id);
+    const existing = cLikes.find((l) => l.discipline_den_comment_user_id === user.id);
 
     if (existing) {
-      await supabase.from('discipline_den_likes').delete().eq('id', existing.id);
+      await supabase.from('discipline_den_likes').delete().eq('discipline_den_likes_id', existing.discipline_den_likes_id);
     } else {
       await supabase.from('discipline_den_likes').insert({
-        comment_parent_ref: commentId,
+        discipline_den_likes_comment_parent_ref: commentId,
         discipline_den_post_ref: postId,
-        discipline_den_like_user: user.id,
+        discipline_den_comment_user_id: user.id,
       });
     }
     // Re-fetch comment likes
     const { data } = await supabase
       .from('discipline_den_likes')
       .select('*')
-      .eq('comment_parent_ref', commentId);
+      .eq('discipline_den_likes_comment_parent_ref', commentId);
     setCommentLikesMap((prev) => ({ ...prev, [commentId]: data || [] }));
   }
 
@@ -311,7 +311,6 @@ export default function DisciplineDenPage() {
       discipline_den_comment_parent_ref: postId,
       discipline_den_comment_user_id: user.id,
       discipline_den_comment_text: text,
-      created_at: new Date().toISOString(),
     });
 
     if (error) {
@@ -337,13 +336,13 @@ export default function DisciplineDenPage() {
   /*  Helpers for like state                                           */
   /* ================================================================ */
   function postLikeCount(postId) {
-    return (likesMap[postId] || []).filter((l) => !l.comment_parent_ref).length;
+    return (likesMap[postId] || []).filter((l) => !l.discipline_den_likes_comment_parent_ref).length;
   }
 
   function userLikedPost(postId) {
     if (!user) return false;
     return (likesMap[postId] || []).some(
-      (l) => l.discipline_den_like_user === user.id && !l.comment_parent_ref
+      (l) => l.discipline_den_comment_user_id === user.id && !l.discipline_den_likes_comment_parent_ref
     );
   }
 
@@ -354,7 +353,7 @@ export default function DisciplineDenPage() {
   function userLikedComment(commentId) {
     if (!user) return false;
     return (commentLikesMap[commentId] || []).some(
-      (l) => l.discipline_den_like_user === user.id
+      (l) => l.discipline_den_comment_user_id === user.id
     );
   }
 
@@ -459,7 +458,7 @@ export default function DisciplineDenPage() {
           <div style={styles.feed}>
             {posts.map((post) => {
               const postUser = post.users;
-              const postId = post.id;
+              const postId = post.discipline_den_id;
               const comments = commentsMap[postId] || [];
               const isExpanded = expandedComments[postId] || false;
 
@@ -566,14 +565,14 @@ export default function DisciplineDenPage() {
                       ) : (
                         <div style={styles.commentsList}>
                           {comments.map((comment) => (
-                            <div key={comment.id} style={styles.commentItem}>
+                            <div key={comment.discipline_den_comment_id} style={styles.commentItem}>
                               <div style={styles.commentHeader}>
                                 <span style={styles.commentAuthor}>
                                   {displayName(comment.users)}
                                 </span>
                                 <span style={styles.commentDate}>
-                                  {comment.created_at
-                                    ? formatDistanceToNow(new Date(comment.created_at), {
+                                  {comment.discipline_den_comment_date
+                                    ? formatDistanceToNow(new Date(comment.discipline_den_comment_date), {
                                         addSuffix: true,
                                       })
                                     : ''}
@@ -584,16 +583,16 @@ export default function DisciplineDenPage() {
                               </p>
                               <button
                                 onClick={() =>
-                                  handleToggleCommentLike(comment.id, postId)
+                                  handleToggleCommentLike(comment.discipline_den_comment_id, postId)
                                 }
                                 style={{
                                   ...styles.commentFlameButton,
-                                  ...(userLikedComment(comment.id)
+                                  ...(userLikedComment(comment.discipline_den_comment_id)
                                     ? styles.flameLiked
                                     : {}),
                                 }}
                                 title={
-                                  userLikedComment(comment.id)
+                                  userLikedComment(comment.discipline_den_comment_id)
                                     ? 'Remove flame'
                                     : 'Add flame'
                                 }
@@ -601,9 +600,9 @@ export default function DisciplineDenPage() {
                                 <span role="img" aria-label="flame">
                                   {'\uD83D\uDD25'}
                                 </span>{' '}
-                                {commentLikeCount(comment.id) > 0 && (
+                                {commentLikeCount(comment.discipline_den_comment_id) > 0 && (
                                   <span style={styles.flameCount}>
-                                    {commentLikeCount(comment.id)}
+                                    {commentLikeCount(comment.discipline_den_comment_id)}
                                   </span>
                                 )}
                               </button>
