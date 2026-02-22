@@ -17,6 +17,7 @@ export default function ManageUsersPage() {
   const [expandedUserId, setExpandedUserId] = useState(null);
   const [editData, setEditData] = useState({});
   const [saving, setSaving] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
   const [message, setMessage] = useState(null);
 
@@ -92,6 +93,24 @@ export default function ManageUsersPage() {
       fetchUsers();
     }
     setSaving(false);
+  }
+
+  async function handleResetPassword(userEmail, userName) {
+    if (!userEmail) {
+      showMessage('No email address found for this user.', 'error');
+      return;
+    }
+    setResettingPassword(userEmail);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
+        redirectTo: window.location.origin + '/armory',
+      });
+      if (error) throw error;
+      showMessage(`Password reset email sent to ${userName || userEmail}.`);
+    } catch (err) {
+      showMessage('Failed to send reset email: ' + err.message, 'error');
+    }
+    setResettingPassword(null);
   }
 
   async function handleApproveRequest(request) {
@@ -313,6 +332,8 @@ export default function ManageUsersPage() {
                       onRowClick={() => handleRowClick(user)}
                       onSave={() => handleSaveUser(user.user_id)}
                       saving={saving}
+                      onResetPassword={() => handleResetPassword(user.user_email, `${user.user_first_name} ${user.user_last_name}`)}
+                      resettingPassword={resettingPassword === user.user_email}
                     />
                   ))}
                 </tbody>
@@ -347,7 +368,7 @@ function getUserAvatarUrl(u) {
   return null;
 }
 
-function UserRow({ user, isExpanded, editData, setEditData, onRowClick, onSave, saving }) {
+function UserRow({ user, isExpanded, editData, setEditData, onRowClick, onSave, saving, onResetPassword, resettingPassword }) {
   const avatarSrc = getUserAvatarUrl(user);
 
   return (
@@ -435,6 +456,19 @@ function UserRow({ user, isExpanded, editData, setEditData, onRowClick, onSave, 
                   disabled={saving}
                 >
                   {saving ? 'Saving...' : 'Save Changes'}
+                </button>
+                <button
+                  style={{
+                    ...styles.resetPasswordBtn,
+                    ...(resettingPassword ? styles.saveBtnDisabled : {}),
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onResetPassword();
+                  }}
+                  disabled={resettingPassword}
+                >
+                  {resettingPassword ? 'Sending...' : 'Reset Password'}
                 </button>
               </div>
             </div>
@@ -803,5 +837,18 @@ const styles = {
   saveBtnDisabled: {
     opacity: 0.7,
     cursor: 'not-allowed',
+  },
+  resetPasswordBtn: {
+    padding: '8px 24px',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#fff',
+    backgroundColor: 'var(--color-warning)',
+    border: 'none',
+    borderRadius: 'var(--radius-sm)',
+    cursor: 'pointer',
+    transition: 'opacity 0.2s',
+    whiteSpace: 'nowrap',
+    alignSelf: 'flex-end',
   },
 };

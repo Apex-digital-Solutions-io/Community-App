@@ -25,5 +25,6 @@ const s = {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
+    paddingTop: '24px',
   },
 };

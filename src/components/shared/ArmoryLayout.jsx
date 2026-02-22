@@ -569,7 +569,7 @@ const s = {
   },
   content: {
     flex: 1,
-    padding: '32px',
+    padding: '48px 32px 32px',
     maxWidth: '1100px',
     width: '100%',
     margin: '0 auto',

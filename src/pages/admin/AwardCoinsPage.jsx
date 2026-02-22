@@ -43,6 +43,11 @@ export default function AwardCoinsPage() {
   const [recentAwards, setRecentAwards] = useState([]);
   const [loadingRecent, setLoadingRecent] = useState(false);
 
+  /* Add new activity */
+  const [showAddActivity, setShowAddActivity] = useState(false);
+  const [newActivity, setNewActivity] = useState({ name: '', value: '', day: 'All days', role: 'All' });
+  const [addingActivity, setAddingActivity] = useState(false);
+
   /* Messages */
   const [error, setError] = useState('');
 
@@ -214,6 +219,28 @@ export default function AwardCoinsPage() {
     setTalentAmount(10);
     setSubmitSuccess(false);
     setError('');
+  }
+
+  async function handleAddActivity() {
+    if (!newActivity.name || !newActivity.value) return;
+    setAddingActivity(true);
+    try {
+      const record = {
+        point_activity: newActivity.name,
+        point_value: parseInt(newActivity.value, 10),
+        point_coin_type: selectedCoinType,
+        point_day: newActivity.day,
+        point_role: newActivity.role,
+      };
+      const { error: insertErr } = await supabase.from('points').insert(record);
+      if (insertErr) throw insertErr;
+      setNewActivity({ name: '', value: '', day: 'All days', role: 'All' });
+      setShowAddActivity(false);
+      fetchPointActivities();
+    } catch (err) {
+      setError(err.message || 'Failed to add activity.');
+    }
+    setAddingActivity(false);
   }
 
   async function handleSubmit() {
@@ -528,8 +555,20 @@ export default function AwardCoinsPage() {
                     </div>
                   ) : loadingPoints ? (
                     <p style={styles.loadingText}>Loading activities...</p>
-                  ) : pointActivities.length === 0 ? (
-                    <p style={styles.emptyText}>No applicable activities found for the selected configuration.</p>
+                  ) : pointActivities.length === 0 && !showAddActivity ? (
+                    <div>
+                      <p style={styles.emptyText}>No applicable activities found for the selected configuration.</p>
+                      {isForgeKeeper && (
+                        <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                          <button
+                            style={styles.primaryBtn}
+                            onClick={() => setShowAddActivity(true)}
+                          >
+                            Add Activity for {selectedCoinType}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div>
                       <p style={styles.stepDesc}>
@@ -558,6 +597,92 @@ export default function AwardCoinsPage() {
                             </label>
                           );
                         })}
+                      </div>
+                      {isForgeKeeper && !showAddActivity && (
+                        <div style={{ marginTop: '16px' }}>
+                          <button
+                            style={styles.addActivityToggleBtn}
+                            onClick={() => setShowAddActivity(true)}
+                          >
+                            + Add New Activity
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Add Activity Form */}
+                  {showAddActivity && isForgeKeeper && (
+                    <div style={styles.addActivityForm}>
+                      <h4 style={styles.addActivityTitle}>Add New Activity for {selectedCoinType}</h4>
+                      <div style={styles.addActivityFields}>
+                        <div style={styles.fieldGroup}>
+                          <label style={styles.label}>Activity Name</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Led a Bible study"
+                            value={newActivity.name}
+                            onChange={(e) => setNewActivity((prev) => ({ ...prev, name: e.target.value }))}
+                            style={styles.input}
+                          />
+                        </div>
+                        <div style={styles.fieldGroup}>
+                          <label style={styles.label}>Point Value</label>
+                          <input
+                            type="number"
+                            min="1"
+                            placeholder="e.g. 10"
+                            value={newActivity.value}
+                            onChange={(e) => setNewActivity((prev) => ({ ...prev, value: e.target.value }))}
+                            style={{ ...styles.input, maxWidth: '120px' }}
+                          />
+                        </div>
+                        <div style={styles.fieldGroup}>
+                          <label style={styles.label}>Day</label>
+                          <select
+                            value={newActivity.day}
+                            onChange={(e) => setNewActivity((prev) => ({ ...prev, day: e.target.value }))}
+                            style={styles.addActivitySelect}
+                          >
+                            <option value="All days">All Days</option>
+                            {MEETING_DAYS.map((d) => (
+                              <option key={d} value={d}>{d}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div style={styles.fieldGroup}>
+                          <label style={styles.label}>Role</label>
+                          <select
+                            value={newActivity.role}
+                            onChange={(e) => setNewActivity((prev) => ({ ...prev, role: e.target.value }))}
+                            style={styles.addActivitySelect}
+                          >
+                            <option value="All">All Roles</option>
+                            <option value="User">User</option>
+                            <option value="Swordsman">Swordsman</option>
+                            <option value="Edge Keeper">Edge Keeper</option>
+                            <option value="Forge Keeper">Forge Keeper</option>
+                            <option value="Admin">Admin</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div style={styles.addActivityActions}>
+                        <button
+                          style={styles.secondaryBtn}
+                          onClick={() => { setShowAddActivity(false); setNewActivity({ name: '', value: '', day: 'All days', role: 'All' }); }}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          style={{
+                            ...styles.primaryBtn,
+                            ...(!newActivity.name || !newActivity.value ? styles.primaryBtnDisabled : {}),
+                          }}
+                          onClick={handleAddActivity}
+                          disabled={!newActivity.name || !newActivity.value || addingActivity}
+                        >
+                          {addingActivity ? 'Adding...' : 'Add Activity'}
+                        </button>
                       </div>
                     </div>
                   )}
@@ -1031,6 +1156,56 @@ const styles = {
     fontSize: '13px',
     color: 'var(--color-error)',
     marginTop: '8px',
+  },
+
+  /* Add Activity */
+  addActivityToggleBtn: {
+    padding: '10px 20px',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: 'var(--color-primary)',
+    backgroundColor: 'rgba(220, 20, 60, 0.06)',
+    border: '1px dashed var(--color-primary)',
+    borderRadius: 'var(--radius-sm)',
+    cursor: 'pointer',
+    transition: 'background-color 0.15s',
+    width: '100%',
+    textAlign: 'center',
+  },
+  addActivityForm: {
+    marginTop: '20px',
+    padding: '24px',
+    backgroundColor: 'var(--color-bg-alt)',
+    borderRadius: 'var(--radius-md)',
+    border: '1px solid var(--color-border)',
+  },
+  addActivityTitle: {
+    fontSize: '16px',
+    fontWeight: '700',
+    color: 'var(--color-text)',
+    marginBottom: '20px',
+  },
+  addActivityFields: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+    gap: '16px',
+    marginBottom: '20px',
+  },
+  addActivitySelect: {
+    padding: '10px 14px',
+    fontSize: '14px',
+    color: 'var(--color-text)',
+    backgroundColor: 'var(--color-bg)',
+    border: '1px solid var(--color-border)',
+    borderRadius: 'var(--radius-sm)',
+    outline: 'none',
+    cursor: 'pointer',
+    boxSizing: 'border-box',
+  },
+  addActivityActions: {
+    display: 'flex',
+    gap: '12px',
+    justifyContent: 'flex-end',
   },
 
   /* Review */

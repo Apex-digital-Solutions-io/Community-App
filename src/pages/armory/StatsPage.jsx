@@ -24,7 +24,7 @@ const DATE_RANGES = [
 ];
 
 export default function StatsPage() {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [stats, setStats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -32,11 +32,20 @@ export default function StatsPage() {
   const [dayFilter, setDayFilter] = useState('All');
   const [dateRange, setDateRange] = useState(30);
 
+  /* Coin totals (same as Dashboard) */
+  const [credits, setCredits] = useState(0);
+  const [tokens, setTokens] = useState(0);
+  const [coins, setCoins] = useState(0);
+
   useEffect(() => {
     if (profile?.user_id) {
       fetchStats();
     }
   }, [profile?.user_id]);
+
+  useEffect(() => {
+    if (user) fetchCoinTotals();
+  }, [user]);
 
   async function fetchStats() {
     setLoading(true);
@@ -55,6 +64,54 @@ export default function StatsPage() {
       setError('Failed to load stats data.');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchCoinTotals() {
+    try {
+      const { data: coinData, error: coinError } = await supabase
+        .from('coin_relationships')
+        .select('*')
+        .eq('coin_user_id', user.id);
+
+      if (coinError) throw coinError;
+
+      const allRecords = coinData || [];
+
+      // Crucible Credits
+      const crucibleRecords = allRecords.filter(
+        (r) => r.coin_type_id === 'Crucible Credit'
+      );
+      let totalCredits = 0;
+      if (crucibleRecords.length > 0) {
+        const allPointRefs = crucibleRecords.reduce((acc, record) => {
+          if (Array.isArray(record.coin_relationship_point_ref) && record.coin_relationship_point_ref.length > 0) {
+            acc.push(...record.coin_relationship_point_ref);
+          }
+          return acc;
+        }, []);
+        if (allPointRefs.length > 0) {
+          const { data: pointsData, error: pointsError } = await supabase
+            .from('points')
+            .select('point_value')
+            .in('point_id', allPointRefs);
+          if (pointsError) throw pointsError;
+          totalCredits = (pointsData || []).reduce((sum, pt) => sum + (pt.point_value || 0), 0);
+        }
+      }
+
+      // Talent Tokens
+      const talentRecords = allRecords.filter((r) => r.coin_type_id === 'Talent Token');
+      const totalTokens = talentRecords.reduce((sum, r) => sum + (r.coin_relationship_talent_amount || 0), 0);
+
+      // Kingdom Coins
+      const totalCoins = allRecords.filter((r) => r.coin_type_id === 'Kingdom Coin').length;
+
+      setCredits(totalCredits);
+      setTokens(totalTokens);
+      setCoins(totalCoins);
+    } catch (err) {
+      console.error('Error fetching coin totals:', err);
     }
   }
 
@@ -278,6 +335,22 @@ export default function StatsPage() {
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Coin Totals (matching Dashboard) */}
+        <div style={styles.coinGrid}>
+          <div style={{ ...styles.coinCard, borderLeft: '4px solid var(--color-primary)' }}>
+            <span style={styles.coinValue}>{credits}</span>
+            <span style={styles.coinLabel}>Crucible Credits</span>
+          </div>
+          <div style={{ ...styles.coinCard, borderLeft: '4px solid var(--color-warning)' }}>
+            <span style={styles.coinValue}>{tokens}</span>
+            <span style={styles.coinLabel}>Talent Tokens</span>
+          </div>
+          <div style={{ ...styles.coinCard, borderLeft: '4px solid var(--color-success)' }}>
+            <span style={styles.coinValue}>{coins}</span>
+            <span style={styles.coinLabel}>Kingdom Coins</span>
           </div>
         </div>
 
@@ -511,6 +584,37 @@ const styles = {
     color: '#ffffff',
     backgroundColor: 'var(--color-primary)',
     borderColor: 'var(--color-primary)',
+  },
+
+  /* Coin Totals */
+  coinGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '16px',
+    marginBottom: '24px',
+  },
+  coinCard: {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '20px 24px',
+    backgroundColor: 'var(--color-bg)',
+    borderRadius: 'var(--radius-lg)',
+    border: '1px solid var(--color-border)',
+    boxShadow: 'var(--shadow-sm)',
+    gap: '4px',
+  },
+  coinValue: {
+    fontSize: '28px',
+    fontWeight: '700',
+    color: 'var(--color-text)',
+    lineHeight: '1.2',
+  },
+  coinLabel: {
+    fontSize: '13px',
+    fontWeight: '500',
+    color: 'var(--color-text-muted)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
   },
 
   /* Summary Cards */

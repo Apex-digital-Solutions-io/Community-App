@@ -197,6 +197,8 @@ const s = {
     backgroundColor: 'var(--color-bg)',
     borderBottom: '1px solid var(--color-border)',
     height: 'var(--header-height)',
+    minHeight: 'var(--header-height)',
+    flexShrink: 0,
     transition: 'box-shadow 0.2s ease',
   },
   nav: {
