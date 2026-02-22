@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { ROLES } from '../../lib/constants';
+import { ROLES, buildAvatarUrl } from '../../lib/constants';
 
 const ROLE_OPTIONS = [ROLES.USER, ROLES.EDGE_KEEPER, ROLES.FORGE_KEEPER, ROLES.ADMIN];
 
@@ -325,8 +325,30 @@ export default function ManageUsersPage() {
   );
 }
 
+function getUserAvatarUrl(u) {
+  if (u.user_photo_source === 'Photo' && u.user_photo_upload) return u.user_photo_upload;
+  if (u.top) {
+    return buildAvatarUrl({
+      Background_or_Transparent: u.background_or_transparent || 'Circle',
+      Top: u.top || 'ShortHairShortFlat',
+      Accessories: u.accessories || 'Blank',
+      HairColor: u.hair_color || 'Brown',
+      FacialHair: u.facial_hair || 'Blank',
+      FacialHairColor: u.facial_hair_color || 'Brown',
+      ClotheColor: u.clothe_color || 'Black',
+      Clothes: u.clothes || 'ShirtCrewNeck',
+      Graphic: u.graphic || 'Bat',
+      Eyes: u.eyes || 'Default',
+      Eyebrow: u.eyebrow || 'Default',
+      Mouth: u.mouth || 'Default',
+      Skin_Color: u.skin_color || 'Light',
+    });
+  }
+  return null;
+}
+
 function UserRow({ user, isExpanded, editData, setEditData, onRowClick, onSave, saving }) {
-  const avatarSrc = user.user_avatar_url || null;
+  const avatarSrc = getUserAvatarUrl(user);
 
   return (
     <>

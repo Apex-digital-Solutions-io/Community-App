@@ -54,7 +54,7 @@ export default function DashboardPage() {
             const { data: pointsData, error: pointsError } = await supabase
               .from('points')
               .select('point_value')
-              .in('id', allPointRefs);
+              .in('point_id', allPointRefs);
 
             if (pointsError) throw pointsError;
 
@@ -108,7 +108,7 @@ export default function DashboardPage() {
     fetchCoinTotals();
   }, [user]);
 
-  const firstName = profile?.first_name || profile?.user_first_name || 'Warrior';
+  const firstName = profile?.user_first_name || 'Warrior';
 
   if (loading) {
     return (
@@ -194,7 +194,7 @@ export default function DashboardPage() {
           ) : (
             <div style={styles.activityList}>
               {recentActivity.map((item) => (
-                <div key={item.id} style={styles.activityItem}>
+                <div key={item.coin_relationship_id} style={styles.activityItem}>
                   <div style={styles.activityDot} />
                   <div style={styles.activityContent}>
                     <p style={styles.activityType}>{item.coin_type_id}</p>

@@ -125,7 +125,7 @@ export default function RelationshipsPage() {
       disciple_id: discipleId,
     };
     if (relationshipDate) {
-      record.relationship_date = relationshipDate;
+      record.date_of_relationship = relationshipDate;
     }
 
     const { error } = await supabase.from('relationships').insert(record);
@@ -147,7 +147,7 @@ export default function RelationshipsPage() {
     const { error } = await supabase
       .from('relationships')
       .delete()
-      .eq('id', relationshipId);
+      .eq('relationship_id', relationshipId);
 
     if (error) {
       showMessage('Failed to remove relationship: ' + error.message, 'error');
@@ -312,7 +312,7 @@ export default function RelationshipsPage() {
                   {/* Disciples */}
                   <div style={styles.discipleList}>
                     {group.disciples.map((rel) => (
-                      <div key={rel.id} style={styles.discipleRow}>
+                      <div key={rel.relationship_id} style={styles.discipleRow}>
                         <div style={styles.treeLine}>
                           <div style={styles.treeLineVertical} />
                           <div style={styles.treeLineHorizontal} />
@@ -327,12 +327,12 @@ export default function RelationshipsPage() {
                             </span>
                             <span style={styles.discipleMeta}>
                               {rel.discipleInfo?.user_role || 'User'}
-                              {rel.relationship_date && (
+                              {rel.date_of_relationship && (
                                 <>
                                   {' '}
                                   &middot; Since{' '}
                                   {new Date(
-                                    rel.relationship_date + 'T00:00:00'
+                                    rel.date_of_relationship + 'T00:00:00'
                                   ).toLocaleDateString()}
                                 </>
                               )}
@@ -341,15 +341,15 @@ export default function RelationshipsPage() {
                           <button
                             style={{
                               ...styles.removeBtn,
-                              ...(removingId === rel.id
+                              ...(removingId === rel.relationship_id
                                 ? styles.removeBtnDisabled
                                 : {}),
                             }}
-                            onClick={() => handleRemoveRelationship(rel.id)}
-                            disabled={removingId === rel.id}
+                            onClick={() => handleRemoveRelationship(rel.relationship_id)}
+                            disabled={removingId === rel.relationship_id}
                             title="Remove relationship"
                           >
-                            {removingId === rel.id ? (
+                            {removingId === rel.relationship_id ? (
                               '...'
                             ) : (
                               <svg

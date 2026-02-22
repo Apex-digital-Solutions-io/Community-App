@@ -9,7 +9,7 @@ import { buildAvatarUrl } from '../../lib/constants';
 /* ------------------------------------------------------------------ */
 function avatarSrc(u) {
   if (!u) return null;
-  if (u.user_photo_source) return u.user_photo_source;
+  if (u.user_photo_source === 'Photo' && u.user_photo_upload) return u.user_photo_upload;
   if (u.top) {
     return buildAvatarUrl({
       Background_or_Transparent: u.background_or_transparent || 'Circle',
@@ -72,7 +72,7 @@ export default function DisciplineDenPage() {
     const { data, error } = await supabase
       .from('discipline_den')
       .select(
-        '*, users!discipline_den_user(user_id, user_name, user_first_name, user_last_name, user_photo_source, skin_color, top, hair_color, accessories, facial_hair, facial_hair_color, clothes, clothe_color, graphic, eyes, eyebrow, mouth, background_or_transparent)'
+        '*, users!discipline_den_user(user_id, user_name, user_first_name, user_last_name, user_photo_source, user_photo_upload, skin_color, top, hair_color, accessories, facial_hair, facial_hair_color, clothes, clothe_color, graphic, eyes, eyebrow, mouth, background_or_transparent)'
       )
       .order('discipline_den_date_created', { ascending: false });
 

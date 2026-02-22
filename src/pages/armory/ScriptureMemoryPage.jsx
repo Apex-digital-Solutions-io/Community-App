@@ -124,7 +124,7 @@ export default function ScriptureMemoryPage() {
 
       if (updateError) throw updateError;
       setEntries((prev) =>
-        prev.map((e) => (e.id === entry.scripture_id ? { ...e, scripture_hide_verse: newValue } : e))
+        prev.map((e) => (e.scripture_id === entry.scripture_id ? { ...e, scripture_hide_verse: newValue } : e))
       );
     } catch (err) {
       console.error('Error toggling verse visibility:', err);

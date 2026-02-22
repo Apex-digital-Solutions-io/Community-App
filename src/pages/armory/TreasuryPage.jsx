@@ -67,7 +67,7 @@ export default function TreasuryPage() {
 
     for (const record of coinRelationships) {
       if (record.coin_type_id === COIN_TYPE_CC) {
-        const pointIds = record.point_ids || record.point_ref || [];
+        const pointIds = record.coin_relationship_point_ref || [];
         let recordTotal = 0;
         for (const pid of pointIds) {
           const point = pointsMap[pid];
@@ -110,7 +110,7 @@ export default function TreasuryPage() {
   }
 
   function getPointActivities(record) {
-    const pointIds = record.point_ids || record.point_ref || [];
+    const pointIds = record.coin_relationship_point_ref || [];
     if (!pointIds.length) return '--';
     const activities = pointIds
       .map((pid) => {
@@ -122,7 +122,7 @@ export default function TreasuryPage() {
 
   function getComputedValue(record) {
     if (record.coin_type_id === COIN_TYPE_CC) {
-      const pointIds = record.point_ids || record.point_ref || [];
+      const pointIds = record.coin_relationship_point_ref || [];
       let total = 0;
       for (const pid of pointIds) {
         const point = pointsMap[pid];

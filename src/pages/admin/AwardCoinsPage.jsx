@@ -257,7 +257,7 @@ export default function AwardCoinsPage() {
   }
 
   function getPointsSummary() {
-    return pointActivities.filter((p) => selectedPointIds.includes(p.id || p.point_id));
+    return pointActivities.filter((p) => selectedPointIds.includes(p.point_id));
   }
 
   if (authLoading) {
@@ -537,7 +537,7 @@ export default function AwardCoinsPage() {
                       </p>
                       <div style={styles.activityList}>
                         {pointActivities.map((point) => {
-                          const pid = point.id || point.point_id;
+                          const pid = point.point_id;
                           const isChecked = selectedPointIds.includes(pid);
                           return (
                             <label
@@ -600,7 +600,7 @@ export default function AwardCoinsPage() {
                         <span style={styles.reviewLabel}>Activities</span>
                         <div style={styles.reviewActivities}>
                           {getPointsSummary().map((p) => (
-                            <span key={p.id || p.point_id} style={styles.reviewActivityTag}>
+                            <span key={p.point_id} style={styles.reviewActivityTag}>
                               {p.point_activity} (+{p.point_value})
                             </span>
                           ))}
@@ -665,7 +665,7 @@ export default function AwardCoinsPage() {
           ) : (
             <div style={styles.recentList}>
               {recentAwards.map((award, index) => (
-                <div key={award.id || index} style={styles.recentItem}>
+                <div key={award.coin_relationship_id || index} style={styles.recentItem}>
                   <div style={styles.recentItemInfo}>
                     <span style={styles.recentItemUser}>
                       {award.awarded_user
