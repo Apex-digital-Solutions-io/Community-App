@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { ThemeToggle } from '../../components/shared/Navbar';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -79,29 +80,24 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div style={styles.page}>
-        <div style={styles.card}>
-          <div style={styles.successIcon}>
-            <svg
-              width="48"
-              height="48"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              aria-hidden="true"
-            >
-              <path
-                d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
-                fill="var(--color-success)"
-              />
+      <div style={s.page}>
+        <div style={s.themeToggleWrap}><ThemeToggle /></div>
+        <div style={s.card}>
+          <div style={s.logoWrap}>
+            <img src="/hvklogo.png" alt="HVK" style={s.logo} />
+          </div>
+          <div style={s.rule} />
+          <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="var(--crimson)" />
             </svg>
           </div>
-          <h2 style={styles.successHeading}>Request Submitted</h2>
-          <p style={styles.successMessage}>
+          <h2 style={s.successHeading}>Request Submitted</h2>
+          <p style={s.successMessage}>
             Your request has been submitted. You'll be notified when approved.
           </p>
-          <div style={styles.footer}>
-            <Link to="/armory/login" style={styles.footerLink}>
+          <div style={s.footer}>
+            <Link to="/armory/login" className="hvk-auth-link" style={s.footerLink}>
               Back to Sign In
             </Link>
           </div>
@@ -110,200 +106,167 @@ export default function RegisterPage() {
     );
   }
 
+  const fields = [
+    { id: 'reg-firstName', name: 'firstName', label: 'FIRST NAME', placeholder: 'John', autoComplete: 'given-name', type: 'text' },
+    { id: 'reg-lastName', name: 'lastName', label: 'LAST NAME', placeholder: 'Doe', autoComplete: 'family-name', type: 'text' },
+    { id: 'reg-email', name: 'email', label: 'EMAIL', placeholder: 'you@example.com', autoComplete: 'email', type: 'email', full: true },
+    { id: 'reg-password', name: 'password', label: 'PASSWORD', placeholder: 'Min 6 characters', autoComplete: 'new-password', type: 'password' },
+    { id: 'reg-confirmPassword', name: 'confirmPassword', label: 'CONFIRM PASSWORD', placeholder: 'Re-enter password', autoComplete: 'new-password', type: 'password' },
+    { id: 'reg-state', name: 'state', label: 'STATE', placeholder: 'e.g. Texas', autoComplete: 'address-level1', type: 'text', full: true },
+    { id: 'reg-invitedBy', name: 'invitedBy', label: 'INVITED BY', placeholder: 'Name of the person who invited you', type: 'text', full: true },
+  ];
+
+  const renderField = (f) => (
+    <div key={f.id} style={s.fieldGroup}>
+      <label htmlFor={f.id} style={s.label}>{f.label}</label>
+      <input
+        id={f.id}
+        className="hvk-auth-input"
+        type={f.type}
+        name={f.name}
+        value={formData[f.name]}
+        onChange={handleChange}
+        placeholder={f.placeholder}
+        autoComplete={f.autoComplete}
+        required
+        style={s.input}
+      />
+    </div>
+  );
+
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        <div style={styles.headerSection}>
-          <h1 style={styles.heading}>Request Access to The Armory</h1>
-          <p style={styles.subheading}>
-            Fill out the form below to request membership
-          </p>
+    <div style={s.page}>
+      <div style={s.themeToggleWrap}><ThemeToggle /></div>
+
+      <div style={s.card}>
+        <div style={s.logoWrap}>
+          <img src="/hvklogo.png" alt="HVK" style={s.logo} />
         </div>
 
-        <form onSubmit={handleSubmit} style={styles.form} noValidate>
-          <div style={styles.row}>
-            <div style={styles.fieldGroup}>
-              <label htmlFor="reg-firstName" style={styles.label}>
-                First Name
-              </label>
-              <input
-                id="reg-firstName"
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                placeholder="John"
-                autoComplete="given-name"
-                required
-                style={styles.input}
-              />
-            </div>
+        <div style={s.rule} />
 
-            <div style={styles.fieldGroup}>
-              <label htmlFor="reg-lastName" style={styles.label}>
-                Last Name
-              </label>
-              <input
-                id="reg-lastName"
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                placeholder="Doe"
-                autoComplete="family-name"
-                required
-                style={styles.input}
-              />
-            </div>
+        <div style={s.headerSection}>
+          <p style={s.eyebrow}>THE ARMORY</p>
+          <h1 style={s.heading}>Request Access</h1>
+          <p style={s.subheading}>Fill out the form below to request membership</p>
+        </div>
+
+        <form onSubmit={handleSubmit} style={s.form} noValidate>
+          <div style={s.row}>
+            {renderField(fields[0])}
+            {renderField(fields[1])}
           </div>
 
-          <div style={styles.fieldGroup}>
-            <label htmlFor="reg-email" style={styles.label}>
-              Email
-            </label>
-            <input
-              id="reg-email"
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-              autoComplete="email"
-              required
-              style={styles.input}
-            />
+          {renderField(fields[2])}
+
+          <div style={s.row}>
+            {renderField(fields[3])}
+            {renderField(fields[4])}
           </div>
 
-          <div style={styles.row}>
-            <div style={styles.fieldGroup}>
-              <label htmlFor="reg-password" style={styles.label}>
-                Password
-              </label>
-              <input
-                id="reg-password"
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Min 6 characters"
-                autoComplete="new-password"
-                required
-                style={styles.input}
-              />
-            </div>
-
-            <div style={styles.fieldGroup}>
-              <label htmlFor="reg-confirmPassword" style={styles.label}>
-                Confirm Password
-              </label>
-              <input
-                id="reg-confirmPassword"
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Re-enter password"
-                autoComplete="new-password"
-                required
-                style={styles.input}
-              />
-            </div>
-          </div>
-
-          <div style={styles.fieldGroup}>
-            <label htmlFor="reg-state" style={styles.label}>
-              State
-            </label>
-            <input
-              id="reg-state"
-              type="text"
-              name="state"
-              value={formData.state}
-              onChange={handleChange}
-              placeholder="e.g. Texas"
-              autoComplete="address-level1"
-              required
-              style={styles.input}
-            />
-          </div>
-
-          <div style={styles.fieldGroup}>
-            <label htmlFor="reg-invitedBy" style={styles.label}>
-              Invited By
-            </label>
-            <input
-              id="reg-invitedBy"
-              type="text"
-              name="invitedBy"
-              value={formData.invitedBy}
-              onChange={handleChange}
-              placeholder="Name of the person who invited you"
-              required
-              style={styles.input}
-            />
-          </div>
+          {renderField(fields[5])}
+          {renderField(fields[6])}
 
           <button
             type="submit"
+            className="hvk-auth-btn"
             disabled={loading}
             style={{
-              ...styles.submitButton,
-              ...(loading ? styles.submitButtonDisabled : {}),
+              ...s.submitButton,
+              ...(loading ? s.submitButtonDisabled : {}),
             }}
           >
-            {loading ? 'Submitting...' : 'Submit Request'}
+            {loading ? 'SUBMITTING...' : 'SUBMIT REQUEST'}
           </button>
 
           {error && (
-            <div style={styles.errorBox} role="alert">
+            <div style={s.errorBox} role="alert">
               {error}
             </div>
           )}
         </form>
 
-        <div style={styles.footer}>
-          <Link to="/armory/login" style={styles.footerLink}>
+        <div style={s.footer}>
+          <Link to="/armory/login" className="hvk-auth-link" style={s.footerLink}>
             Already have an account? Sign In
           </Link>
+        </div>
+
+        <div style={s.scripture}>
+          <em>"Put on the full armor of God" — Ephesians 6:11</em>
         </div>
       </div>
     </div>
   );
 }
 
-const styles = {
+const s = {
   page: {
     minHeight: '100vh',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'var(--color-bg-alt)',
+    backgroundColor: 'var(--field-bg)',
     padding: '24px',
-    fontFamily: 'var(--font-family)',
+    fontFamily: "'EB Garamond', 'Georgia', serif",
+    position: 'relative',
+    backgroundImage:
+      'radial-gradient(ellipse at 50% 0%, rgba(184,28,44,0.06) 0%, transparent 60%), repeating-linear-gradient(180deg, transparent, transparent 80px, rgba(184,28,44,0.012) 80px, rgba(184,28,44,0.012) 81px)',
+  },
+  themeToggleWrap: {
+    position: 'fixed',
+    top: '20px',
+    right: '20px',
+    zIndex: 1000,
   },
   card: {
     width: '100%',
     maxWidth: '520px',
-    backgroundColor: 'var(--color-bg)',
-    borderRadius: 'var(--radius-lg)',
-    boxShadow: 'var(--shadow-lg)',
+    backgroundColor: 'var(--anvil)',
+    border: '2px solid var(--rule)',
     padding: '40px 32px',
-    border: '1px solid var(--color-border)',
+    position: 'relative',
+  },
+  logoWrap: {
+    textAlign: 'center',
+    marginBottom: '16px',
+  },
+  logo: {
+    width: '64px',
+    height: '64px',
+    objectFit: 'contain',
+    opacity: 0.9,
+  },
+  rule: {
+    width: '60px',
+    height: '2px',
+    backgroundColor: 'var(--crimson)',
+    margin: '0 auto 20px',
+    opacity: 0.85,
   },
   headerSection: {
     textAlign: 'center',
     marginBottom: '28px',
   },
+  eyebrow: {
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '10px',
+    letterSpacing: '3px',
+    color: 'var(--crimson)',
+    margin: '0 0 8px',
+    textTransform: 'uppercase',
+  },
   heading: {
-    fontSize: '24px',
+    fontFamily: "'Cinzel', 'Georgia', serif",
+    fontSize: '26px',
     fontWeight: '700',
-    color: 'var(--color-text)',
+    color: 'var(--parchment)',
     marginBottom: '8px',
     lineHeight: '1.2',
   },
   subheading: {
-    fontSize: '14px',
-    color: 'var(--color-text-muted)',
+    fontSize: '15px',
+    color: 'var(--parchment-dim)',
     margin: 0,
   },
   form: {
@@ -322,77 +285,89 @@ const styles = {
     flex: 1,
   },
   label: {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: 'var(--color-text)',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '10px',
+    fontWeight: '500',
+    letterSpacing: '2px',
+    color: 'var(--parchment-dim)',
   },
   input: {
     width: '100%',
-    padding: '10px 14px',
+    padding: '11px 14px',
     fontSize: '15px',
     lineHeight: '1.5',
-    color: 'var(--color-text)',
-    backgroundColor: 'var(--color-bg)',
-    border: '1px solid var(--color-border)',
-    borderRadius: 'var(--radius-sm)',
+    fontFamily: "'EB Garamond', 'Georgia', serif",
+    color: 'var(--parchment)',
+    backgroundColor: 'var(--onyx)',
+    border: '1px solid var(--rule)',
     outline: 'none',
     transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
     boxSizing: 'border-box',
   },
   submitButton: {
     width: '100%',
-    padding: '12px 20px',
-    fontSize: '15px',
-    fontWeight: '600',
+    padding: '13px 20px',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '11px',
+    fontWeight: '700',
+    letterSpacing: '2.5px',
     color: '#ffffff',
-    backgroundColor: 'var(--color-primary)',
+    backgroundColor: 'var(--crimson)',
     border: 'none',
-    borderRadius: 'var(--radius-sm)',
     cursor: 'pointer',
-    transition: 'background-color 0.2s ease, opacity 0.2s ease',
+    transition: 'opacity 0.2s ease',
     marginTop: '4px',
+    textTransform: 'uppercase',
   },
   submitButtonDisabled: {
-    opacity: 0.7,
+    opacity: 0.5,
     cursor: 'not-allowed',
   },
   errorBox: {
     padding: '12px 14px',
     fontSize: '14px',
-    color: 'var(--color-error)',
+    color: '#ef4444',
     backgroundColor: 'rgba(239, 68, 68, 0.08)',
     border: '1px solid rgba(239, 68, 68, 0.2)',
-    borderRadius: 'var(--radius-sm)',
     lineHeight: '1.4',
   },
   footer: {
     textAlign: 'center',
     marginTop: '24px',
     paddingTop: '20px',
-    borderTop: '1px solid var(--color-border)',
+    borderTop: '1px solid var(--rule)',
   },
   footerLink: {
-    fontSize: '14px',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '11px',
     fontWeight: '500',
-    color: 'var(--color-primary)',
+    letterSpacing: '1.5px',
+    color: 'var(--crimson)',
     textDecoration: 'none',
-  },
-  successIcon: {
-    textAlign: 'center',
-    marginBottom: '16px',
+    textTransform: 'uppercase',
   },
   successHeading: {
+    fontFamily: "'Cinzel', 'Georgia', serif",
     fontSize: '22px',
     fontWeight: '700',
-    color: 'var(--color-text)',
+    color: 'var(--parchment)',
     textAlign: 'center',
     marginBottom: '12px',
   },
   successMessage: {
     fontSize: '15px',
-    color: 'var(--color-text-secondary)',
+    color: 'var(--parchment-dim)',
     textAlign: 'center',
     lineHeight: '1.6',
     margin: 0,
+  },
+  scripture: {
+    textAlign: 'center',
+    marginTop: '20px',
+    fontFamily: "'Cormorant Garamond', 'Georgia', serif",
+    fontSize: '13px',
+    color: 'var(--parchment-dim)',
+    opacity: 0.6,
+    fontStyle: 'italic',
   },
 };

@@ -14,7 +14,6 @@ export default function PublicLayout() {
   );
 }
 
-/* ---------- styles ---------- */
 const s = {
   layout: {
     display: 'flex',
@@ -25,6 +24,6 @@ const s = {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    paddingTop: '24px',
+    paddingTop: '84px',
   },
 };

@@ -1,469 +1,563 @@
-import {
-  Sword,
-  ShieldCheck,
-  Crown,
-  CheckCircle,
-  ArrowDown,
-  Users,
-} from 'lucide-react';
+import { useState, useEffect } from 'react';
 
-const styles = {
-  page: {
-    width: '100%',
+/* ══════════════════════════════════════════════════════════════
+   Roles & Responsibilities — HVK Discipleship Pipeline
+   ══════════════════════════════════════════════════════════════ */
+
+const roles = [
+  {
+    title: 'Swordsman',
+    tier: 'TIER I',
+    greek: 'Mathetes',
+    desc: "Disciple in training — learning to walk in Christ’s authority and overcome sin",
+    duties: [
+      'Daily Bible reading',
+      'Build healthy habits',
+      'Memorize Scripture',
+      'Attend Thursday studies',
+      'Weekly accountability',
+    ],
   },
+  {
+    title: 'Edge Keeper',
+    tier: 'TIER II',
+    greek: 'Diakonos',
+    desc: 'Deacon and discipler — shepherding Swordsmen through their spiritual growth',
+    duties: [
+      'Mentor Swordsmen',
+      'Weekly check-ins',
+      'Lead small discussions',
+      'Recruit new members',
+      'All Swordsman duties',
+    ],
+  },
+  {
+    title: 'Forge Keeper',
+    tier: 'TIER III',
+    greek: 'Episkopos',
+    desc: 'Elder and overseer — guiding the entire community with wisdom and spiritual authority',
+    duties: [
+      'Lead Thursday studies',
+      'One-on-one discipleship',
+      'Handle discipline biblically',
+      'Create teachings',
+      'Oversee Edge Keepers',
+    ],
+  },
+];
 
-  /* ── Header ──────────────────────────────────────────────── */
+const treeData = {
+  level1: [{ label: 'FORGE KEEPER', name: 'Peter' }],
+  level2: [
+    { label: 'EDGE KEEPER', name: 'Mark' },
+    { label: 'EDGE KEEPER', name: 'Silas' },
+  ],
+  level3: [
+    { label: 'SWORDSMAN', name: 'Timothy' },
+    { label: 'SWORDSMAN', name: 'Barnabas' },
+    { label: 'SWORDSMAN', name: 'Luke' },
+    { label: 'SWORDSMAN', name: 'Titus' },
+    { label: 'SWORDSMAN', name: 'Onesimus' },
+    { label: 'SWORDSMAN', name: 'Epaphras' },
+    { label: 'SWORDSMAN', name: 'Clement' },
+  ],
+};
+
+/* ── Styles ──────────────────────────────────────────────────── */
+
+const s = {
+  /* Page */
+  page: { width: '100%' },
+
+  /* ── Page Header ─────────────────────────────────────────── */
   header: {
     padding: '100px 24px 60px',
     textAlign: 'center',
-    background:
-      'linear-gradient(165deg, #fff 0%, #fff5f7 40%, #fce4ec 100%)',
-    borderBottom: '1px solid var(--color-border)',
+    borderBottom: '1px solid var(--rule-soft-2)',
   },
-  headerTag: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '8px',
-    fontSize: '0.8rem',
-    fontWeight: 700,
-    letterSpacing: '2.5px',
+  eyebrow: {
+    fontFamily: "var(--font-mono)",
+    fontSize: '11px',
+    letterSpacing: '6px',
+    color: 'var(--crimson)',
     textTransform: 'uppercase',
-    color: 'var(--color-primary)',
-    marginBottom: '16px',
+    marginBottom: '28px',
   },
-  headerTitle: {
-    fontSize: 'clamp(2rem, 5vw, 3rem)',
-    fontWeight: 900,
-    color: 'var(--color-text)',
-    marginBottom: '16px',
+  logoWrap: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '24px',
   },
-  headerSub: {
-    fontSize: '1.05rem',
-    color: 'var(--color-text-secondary)',
-    maxWidth: '620px',
-    margin: '0 auto',
-    lineHeight: 1.7,
+  logo: {
+    width: '80px',
+    height: '80px',
+    objectFit: 'contain',
+  },
+  title: {
+    fontFamily: 'var(--font-display)',
+    fontWeight: 800,
+    fontSize: 'clamp(28px, 5.5vw, 50px)',
+    letterSpacing: '6px',
+    color: 'var(--parchment)',
+    lineHeight: 1.1,
+    textShadow: 'var(--display-shadow)',
+    marginBottom: '20px',
+  },
+  rule: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    margin: '20px auto',
+    maxWidth: '280px',
+  },
+  ruleLine: { flex: 1, height: '1px', background: 'var(--rule-soft)' },
+  ruleTick: { width: '10px', height: '5px', background: 'var(--crimson)' },
+  subtitle: {
+    fontFamily: 'var(--font-accent)',
+    fontStyle: 'italic',
+    fontSize: '18px',
+    color: 'var(--parchment-dim)',
+    letterSpacing: '1px',
   },
 
-  /* ── Content ─────────────────────────────────────────────── */
+  /* ── Content wrapper ─────────────────────────────────────── */
   content: {
     maxWidth: 'var(--max-width)',
     margin: '0 auto',
     padding: '60px 24px 100px',
   },
 
-  /* ── Intro ───────────────────────────────────────────────── */
-  intro: {
-    textAlign: 'center',
-    maxWidth: '700px',
-    margin: '0 auto 60px',
-  },
-  introText: {
-    fontSize: '1rem',
-    color: 'var(--color-text-secondary)',
-    lineHeight: 1.7,
-  },
-
-  /* ── Role Cards ──────────────────────────────────────────── */
-  rolesGrid: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '40px',
+  /* ── Running header + Section plate ──────────────────────── */
+  sectionWrap: {
     marginBottom: '80px',
   },
-  roleCard: {
-    background: 'var(--color-bg)',
-    borderRadius: 'var(--radius-lg)',
-    boxShadow: 'var(--shadow-md)',
-    overflow: 'hidden',
-    border: '1px solid var(--color-border)',
+  runningHeader: {
+    fontFamily: 'var(--font-mono)',
+    fontSize: '10px',
+    letterSpacing: '5px',
+    color: 'var(--parchment-dim)',
+    textTransform: 'uppercase',
+    marginBottom: '6px',
   },
-  roleHeader: {
+  sectionPlate: {
     display: 'flex',
-    alignItems: 'center',
-    gap: '20px',
-    flexWrap: 'wrap',
-    padding: '28px 32px',
-    color: '#fff',
+    alignItems: 'baseline',
+    gap: '16px',
+    marginBottom: '36px',
+    borderBottom: '1px solid var(--rule-soft-2)',
+    paddingBottom: '16px',
   },
-  roleIconWrap: {
-    width: '56px',
-    height: '56px',
-    borderRadius: '14px',
-    background: 'rgba(255,255,255,0.18)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  roleName: {
-    fontSize: '1.4rem',
+  sectionNumeral: {
+    fontFamily: 'var(--font-display)',
     fontWeight: 800,
+    fontSize: '42px',
+    color: 'var(--crimson)',
+    lineHeight: 1,
   },
-  roleGreek: {
-    fontSize: '0.9rem',
-    opacity: 0.8,
-    fontStyle: 'italic',
-  },
-  roleSubtitle: {
-    fontSize: '0.9rem',
-    opacity: 0.85,
-    fontWeight: 500,
-  },
-  roleTierBadge: {
-    marginLeft: 'auto',
-    padding: '6px 16px',
-    borderRadius: '999px',
-    background: 'rgba(255,255,255,0.18)',
-    fontSize: '0.8rem',
+  sectionTitle: {
+    fontFamily: 'var(--font-display)',
     fontWeight: 700,
-    letterSpacing: '1px',
+    fontSize: '22px',
+    letterSpacing: '4px',
+    color: 'var(--parchment)',
     textTransform: 'uppercase',
-    whiteSpace: 'nowrap',
-  },
-  roleBody: {
-    padding: '32px',
-  },
-  roleDescription: {
-    fontSize: '1rem',
-    color: 'var(--color-text-secondary)',
-    lineHeight: 1.7,
-    marginBottom: '24px',
-  },
-  dutiesTitle: {
-    fontSize: '0.85rem',
-    fontWeight: 700,
-    letterSpacing: '1.5px',
-    textTransform: 'uppercase',
-    color: 'var(--color-text)',
-    marginBottom: '16px',
-  },
-  dutiesList: {
-    listStyle: 'none',
-    padding: 0,
-    margin: 0,
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-    gap: '12px',
-  },
-  dutyItem: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '10px',
-    fontSize: '0.95rem',
-    color: 'var(--color-text-secondary)',
-    lineHeight: 1.5,
-  },
-  dutyIcon: {
-    flexShrink: 0,
-    marginTop: '2px',
   },
 
-  /* ── Hierarchy Diagram ───────────────────────────────────── */
-  hierarchySection: {
-    textAlign: 'center',
-  },
-  hierarchyTitle: {
-    fontSize: '1.6rem',
-    fontWeight: 800,
-    color: 'var(--color-text)',
-    marginBottom: '8px',
-  },
-  hierarchySub: {
-    fontSize: '1rem',
-    color: 'var(--color-text-secondary)',
+  /* ── Intro paragraph with drop-cap ───────────────────────── */
+  introText: {
+    fontFamily: 'var(--font-body)',
+    fontSize: '16px',
+    lineHeight: 1.8,
+    color: 'var(--parchment-dim)',
+    maxWidth: '820px',
     marginBottom: '48px',
   },
-  pyramid: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '0',
-  },
-  pyramidTier: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  pyramidBox: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '14px',
-    padding: '20px 36px',
-    borderRadius: 'var(--radius-md)',
-    color: '#fff',
-    fontWeight: 700,
-    fontSize: '1.05rem',
-    minWidth: '260px',
-    justifyContent: 'center',
-    boxShadow: 'var(--shadow-md)',
-  },
-  pyramidArrow: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '8px 0',
-    color: 'var(--color-text-muted)',
-  },
-  pyramidArrowLine: {
-    width: '2px',
-    height: '20px',
-    background: 'var(--color-border)',
-  },
-  pyramidLabel: {
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    color: 'var(--color-text-muted)',
-    letterSpacing: '1px',
-    textTransform: 'uppercase',
+  dropCap: {
+    fontFamily: 'var(--font-display)',
+    fontWeight: 800,
+    fontSize: '42px',
+    color: 'var(--crimson)',
+    float: 'left',
+    lineHeight: 1,
+    marginRight: '8px',
     marginTop: '4px',
   },
 
-  /* ── Scripture Banner ────────────────────────────────────── */
-  scriptureBanner: {
-    marginTop: '80px',
-    padding: '48px 32px',
+  /* ── Pipeline card ───────────────────────────────────────── */
+  pipelineCard: {
+    background: 'var(--anvil)',
+    border: '1px solid var(--rule)',
+    borderTop: '4px solid var(--crimson)',
+    padding: '0',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  cardEyebrow: {
+    fontFamily: 'var(--font-mono)',
+    fontSize: '10px',
+    letterSpacing: '5px',
+    color: 'var(--crimson)',
+    textTransform: 'uppercase',
     textAlign: 'center',
-    background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
-    borderRadius: 'var(--radius-lg)',
-    color: '#fff',
+    paddingTop: '24px',
+    marginBottom: '8px',
   },
-  scriptureText: {
-    fontSize: '1.2rem',
+  cardTitle: {
+    fontFamily: 'var(--font-display)',
+    fontWeight: 700,
+    fontSize: '24px',
+    letterSpacing: '4px',
+    color: 'var(--parchment)',
+    textAlign: 'center',
+    marginBottom: '4px',
+  },
+  cardGreek: {
+    fontFamily: 'var(--font-accent)',
     fontStyle: 'italic',
-    fontWeight: 500,
-    maxWidth: '600px',
-    margin: '0 auto 12px',
-    lineHeight: 1.6,
+    fontSize: '18px',
+    color: 'var(--parchment-dim)',
+    textAlign: 'center',
+    marginBottom: '16px',
   },
-  scriptureRef: {
-    fontSize: '0.9rem',
-    opacity: 0.7,
+  cardDesc: {
+    fontFamily: 'var(--font-body)',
+    fontSize: '14px',
+    lineHeight: 1.7,
+    color: 'var(--parchment-dim)',
+    textAlign: 'center',
+    padding: '0 24px 16px',
+    borderBottom: '1px dotted var(--rule-soft)',
+    margin: '0 20px',
+  },
+  cardDuties: {
+    listStyle: 'none',
+    padding: '16px 24px 24px',
+    margin: 0,
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  dutyItem: {
+    fontFamily: 'var(--font-body)',
+    fontSize: '14px',
+    color: 'var(--parchment-dim)',
+    lineHeight: 1.6,
+    padding: '8px 0',
+    borderBottom: '1px dotted var(--rule-soft-2)',
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '8px',
+  },
+  dutyItemLast: {
+    fontFamily: 'var(--font-body)',
+    fontSize: '14px',
+    color: 'var(--parchment-dim)',
+    lineHeight: 1.6,
+    padding: '8px 0',
+    display: 'flex',
+    alignItems: 'baseline',
+    gap: '8px',
+  },
+  dutyPrefix: {
+    color: 'var(--crimson)',
+    fontWeight: 700,
+    flexShrink: 0,
+  },
+
+  /* ── Pipeline arrow ──────────────────────────────────────── */
+  pipelineArrow: {
+    fontFamily: 'var(--font-display)',
+    fontSize: '28px',
+    color: 'var(--crimson)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  /* ── Multiplication tree ─────────────────────────────────── */
+  treeBox: {
+    background: 'var(--anvil)',
+    border: '1px solid var(--rule)',
+    padding: '48px 32px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+  treeEyebrow: {
+    fontFamily: 'var(--font-mono)',
+    fontSize: '10px',
+    letterSpacing: '5px',
+    color: 'var(--crimson)',
+    textTransform: 'uppercase',
+    marginBottom: '8px',
+  },
+  treeTitle: {
+    fontFamily: 'var(--font-display)',
+    fontWeight: 700,
+    fontSize: '20px',
+    letterSpacing: '3px',
+    color: 'var(--parchment)',
+    textAlign: 'center',
+    marginBottom: '40px',
+  },
+  treeLevel: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '12px',
+    flexWrap: 'wrap',
+  },
+  treeNode: {
+    background: 'var(--onyx)',
+    border: '2px solid var(--crimson)',
+    padding: '10px 16px',
+    textAlign: 'center',
+    minWidth: '90px',
+  },
+  treeNodeLabel: {
+    fontFamily: 'var(--font-mono)',
+    fontSize: '9px',
+    letterSpacing: '2px',
+    color: 'var(--crimson)',
+    textTransform: 'uppercase',
+    marginBottom: '2px',
+  },
+  treeNodeName: {
+    fontFamily: 'var(--font-display)',
+    fontSize: '11px',
+    letterSpacing: '2px',
+    color: 'var(--parchment)',
+    textTransform: 'uppercase',
+  },
+  treeConnector: {
+    width: '2px',
+    height: '36px',
+    margin: '0 auto',
+    background: 'repeating-linear-gradient(to bottom, var(--crimson) 0px, var(--crimson) 4px, transparent 4px, transparent 8px)',
+  },
+
+  /* ── Verse callout ───────────────────────────────────────── */
+  verseBox: {
+    background: 'var(--anvil)',
+    border: '1px solid var(--rule)',
+    borderLeft: '4px solid var(--crimson)',
+    padding: '40px 36px',
+    textAlign: 'center',
+  },
+  verseEyebrow: {
+    fontFamily: 'var(--font-mono)',
+    fontSize: '10px',
+    letterSpacing: '5px',
+    color: 'var(--crimson)',
+    textTransform: 'uppercase',
+    marginBottom: '16px',
+  },
+  verseQuote: {
+    fontFamily: 'var(--font-accent)',
+    fontStyle: 'italic',
+    fontSize: '22px',
+    color: 'var(--parchment)',
+    lineHeight: 1.6,
+    maxWidth: '640px',
+    margin: '0 auto 16px',
+  },
+  verseRef: {
+    fontFamily: 'var(--font-display)',
+    fontSize: '12px',
+    letterSpacing: '3px',
+    color: 'var(--crimson)',
+    textTransform: 'uppercase',
   },
 };
 
-const roles = [
-  {
-    name: 'Swordsman',
-    greek: 'Mathetes',
-    subtitle: 'Disciple in Training',
-    tier: 'Tier 1',
-    icon: Sword,
-    gradient: 'linear-gradient(135deg, #4a6fa5, #3a5a8a)',
-    description:
-      'The Swordsman is a new or growing disciple learning to wield the Word of God. This role focuses on building foundational spiritual habits and engaging consistently with the community.',
-    duties: [
-      'Daily Bible reading and personal devotion',
-      'Build healthy spiritual habits and routines',
-      'Memorize Scripture passages weekly',
-      'Attend Thursday Bible studies consistently',
-      'Weekly accountability with an Edge Keeper',
-    ],
-  },
-  {
-    name: 'Edge Keeper',
-    greek: 'Diakonos',
-    subtitle: 'Deacon / Discipler',
-    tier: 'Tier 2',
-    icon: ShieldCheck,
-    gradient: 'linear-gradient(135deg, #b8860b, #8b6914)',
-    description:
-      'The Edge Keeper is a proven disciple who now sharpens others. This role carries the responsibility of mentoring Swordsmen, leading in small group settings, and helping expand the brotherhood.',
-    duties: [
-      'Mentor and disciple assigned Swordsmen',
-      'Conduct weekly check-ins with mentees',
-      'Lead small group discussions and breakouts',
-      'Recruit and onboard new members',
-      'Fulfill all Swordsman duties as an example',
-    ],
-  },
-  {
-    name: 'Forge Keeper',
-    greek: 'Episkopos',
-    subtitle: 'Elder / Overseer',
-    tier: 'Tier 3',
-    icon: Crown,
-    gradient: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
-    description:
-      'The Forge Keeper is the spiritual overseer who leads, teaches, and guards the health of the community. This role demands maturity, doctrinal soundness, and a heart for shepherding others.',
-    duties: [
-      'Lead Thursday Scripture studies and teachings',
-      'Provide one-on-one discipleship to Edge Keepers',
-      'Handle discipline and conflict resolution biblically',
-      'Create and prepare teachings and study materials',
-      'Oversee Edge Keepers and the overall discipleship pipeline',
-    ],
-  },
-];
+/* ── Helpers ──────────────────────────────────────────────── */
+
+function RuleDivider() {
+  return (
+    <div style={s.rule}>
+      <div style={s.ruleLine} />
+      <div style={s.ruleTick} />
+      <div style={s.ruleLine} />
+    </div>
+  );
+}
+
+function SectionHeader({ running, numeral, title }) {
+  return (
+    <>
+      <div style={s.runningHeader}>{running}</div>
+      <div style={s.sectionPlate}>
+        <span style={s.sectionNumeral}>{numeral}</span>
+        <span style={s.sectionTitle}>{title}</span>
+      </div>
+    </>
+  );
+}
+
+function PipelineCard({ role }) {
+  return (
+    <div style={s.pipelineCard}>
+      <div style={s.cardEyebrow}>{role.tier}</div>
+      <div style={s.cardTitle}>{role.title.toUpperCase()}</div>
+      <div style={s.cardGreek}>{role.greek}</div>
+      <div style={s.cardDesc}>{role.desc}</div>
+      <ul style={s.cardDuties}>
+        {role.duties.map((d, i) => (
+          <li
+            key={i}
+            style={i < role.duties.length - 1 ? s.dutyItem : s.dutyItemLast}
+          >
+            <span style={s.dutyPrefix}>+</span>
+            {d}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function TreeNode({ label, name }) {
+  return (
+    <div style={s.treeNode}>
+      <div style={s.treeNodeLabel}>{label}</div>
+      <div style={s.treeNodeName}>{name}</div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Component
+   ══════════════════════════════════════════════════════════════ */
 
 export default function RolesPage() {
+  const [narrow, setNarrow] = useState(
+    typeof window !== 'undefined' ? window.innerWidth <= 900 : false,
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 900px)');
+    const handler = (e) => setNarrow(e.matches);
+    mq.addEventListener('change', handler);
+    setNarrow(mq.matches);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  /* Dynamic pipeline grid */
+  const pipelineGrid = {
+    display: 'grid',
+    gridTemplateColumns: narrow ? '1fr' : '1fr auto 1fr auto 1fr',
+    gap: narrow ? '0' : '0 20px',
+    alignItems: 'start',
+  };
+
+  const arrowStyle = {
+    ...s.pipelineArrow,
+    padding: narrow ? '12px 0' : '0',
+    transform: narrow ? 'rotate(90deg)' : 'none',
+    alignSelf: 'center',
+    justifySelf: 'center',
+  };
+
   return (
-    <div style={styles.page}>
-      {/* ── Page Header ──────────────────────── */}
-      <header style={styles.header}>
-        <span style={styles.headerTag}>
-          <Users size={16} /> Discipleship Pipeline
-        </span>
-        <h1 style={styles.headerTitle}>Roles &amp; Responsibilities</h1>
-        <p style={styles.headerSub}>
-          Our three-tier discipleship pipeline is designed to move every man
-          from learner to leader, sharpening each other along the way.
-        </p>
+    <div style={s.page}>
+      {/* ── Page Header ────────────────────────────────── */}
+      <header style={s.header}>
+        <div style={s.eyebrow}>
+          HIDDEN VALLEY KINGS &middot; DISCIPLESHIP PIPELINE
+        </div>
+
+        <div style={s.logoWrap}>
+          <img src="/hvklogo.png" alt="HVK" style={s.logo} />
+        </div>
+
+        <h1 style={s.title}>ROLES &amp; RESPONSIBILITIES</h1>
+
+        <RuleDivider />
+
+        <p style={s.subtitle}>Building disciples for God's Kingdom</p>
       </header>
 
-      <div style={styles.content}>
-        {/* ── Intro ──────────────────────────── */}
-        <div style={styles.intro}>
-          <p style={styles.introText}>
-            Every member of Hidden Valley Kings enters as a Swordsman and grows
-            through intentional discipleship. As faithfulness and maturity
-            increase, men are called into greater responsibility — first as Edge
-            Keepers who disciple others, and ultimately as Forge Keepers who
-            oversee the community.
-          </p>
-        </div>
+      <div style={s.content}>
+        {/* ── Section I: The Discipleship Pipeline ──────── */}
+        <div style={s.sectionWrap}>
+          <SectionHeader
+            running="HIDDEN VALLEY KINGS · ROLES & RESPONSIBILITIES"
+            numeral="I"
+            title="The Discipleship Pipeline"
+          />
 
-        {/* ── Role Cards ────────────────────── */}
-        <div style={styles.rolesGrid}>
-          {roles.map((role) => {
-            const Icon = role.icon;
-            return (
-              <article key={role.name} style={styles.roleCard}>
-                <div
-                  style={{
-                    ...styles.roleHeader,
-                    background: role.gradient,
-                  }}
-                >
-                  <div style={styles.roleIconWrap}>
-                    <Icon size={26} />
-                  </div>
-                  <div>
-                    <div style={styles.roleName}>{role.name}</div>
-                    <div style={styles.roleGreek}>{role.greek}</div>
-                    <div style={styles.roleSubtitle}>{role.subtitle}</div>
-                  </div>
-                  <div style={styles.roleTierBadge}>{role.tier}</div>
-                </div>
-                <div style={styles.roleBody}>
-                  <p style={styles.roleDescription}>{role.description}</p>
-                  <h4 style={styles.dutiesTitle}>Key Responsibilities</h4>
-                  <ul style={styles.dutiesList}>
-                    {role.duties.map((duty, i) => (
-                      <li key={i} style={styles.dutyItem}>
-                        <CheckCircle
-                          size={18}
-                          color="var(--color-primary)"
-                          style={styles.dutyIcon}
-                        />
-                        {duty}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-
-        {/* ── Hierarchy Diagram ──────────────── */}
-        <div style={styles.hierarchySection}>
-          <h2 style={styles.hierarchyTitle}>Discipleship Hierarchy</h2>
-          <p style={styles.hierarchySub}>
-            Each tier supports and sharpens the tier below it.
+          <p style={s.introText}>
+            <span style={s.dropCap}>H</span>
+            idden Valley Kings exists to make disciples of Christ through a
+            clear discipleship pipeline. Every man enters as a Swordsman and
+            grows through intentional mentorship. As faithfulness and maturity
+            increase, men are called into greater responsibility — first as
+            Edge Keepers who disciple others, and ultimately as Forge Keepers
+            who oversee the entire community with wisdom and spiritual
+            authority.
           </p>
 
-          <div style={styles.pyramid}>
-            {/* Forge Keeper */}
-            <div style={styles.pyramidTier}>
-              <div
-                style={{
-                  ...styles.pyramidBox,
-                  background:
-                    'linear-gradient(135deg, var(--color-primary), var(--color-primary-dark))',
-                  minWidth: '220px',
-                }}
-              >
-                <Crown size={22} />
-                Forge Keeper
-              </div>
-              <div style={styles.pyramidLabel}>Episkopos — Elder / Overseer</div>
+          {/* Pipeline grid */}
+          <div style={pipelineGrid}>
+            <PipelineCard role={roles[0]} />
+            <div style={arrowStyle}>&rarr;</div>
+            <PipelineCard role={roles[1]} />
+            <div style={arrowStyle}>&rarr;</div>
+            <PipelineCard role={roles[2]} />
+          </div>
+        </div>
+
+        {/* ── Section II: Four Generations ──────────────── */}
+        <div style={s.sectionWrap}>
+          <SectionHeader
+            running="HIDDEN VALLEY KINGS · ROLES & RESPONSIBILITIES"
+            numeral="II"
+            title="Four Generations"
+          />
+
+          <div style={s.treeBox}>
+            <div style={s.treeEyebrow}>PATTERN OF MULTIPLICATION</div>
+            <div style={s.treeTitle}>From Forge Keeper to Faithful Men</div>
+
+            {/* Level 1 */}
+            <div style={s.treeLevel}>
+              {treeData.level1.map((n, i) => (
+                <TreeNode key={i} label={n.label} name={n.name} />
+              ))}
             </div>
 
-            {/* Arrow */}
-            <div style={styles.pyramidArrow}>
-              <div style={styles.pyramidArrowLine} />
-              <ArrowDown size={20} />
-              <span
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  color: 'var(--color-text-muted)',
-                  marginTop: '2px',
-                }}
-              >
-                Oversees &amp; Disciples
-              </span>
-              <div style={styles.pyramidArrowLine} />
+            {/* Connector */}
+            <div style={s.treeConnector} />
+
+            {/* Level 2 */}
+            <div style={s.treeLevel}>
+              {treeData.level2.map((n, i) => (
+                <TreeNode key={i} label={n.label} name={n.name} />
+              ))}
             </div>
 
-            {/* Edge Keepers */}
-            <div style={styles.pyramidTier}>
-              <div
-                style={{
-                  ...styles.pyramidBox,
-                  background: 'linear-gradient(135deg, #b8860b, #8b6914)',
-                  minWidth: '300px',
-                }}
-              >
-                <ShieldCheck size={22} />
-                Edge Keepers
-              </div>
-              <div style={styles.pyramidLabel}>Diakonos — Deacon / Discipler</div>
-            </div>
+            {/* Connector */}
+            <div style={s.treeConnector} />
 
-            {/* Arrow */}
-            <div style={styles.pyramidArrow}>
-              <div style={styles.pyramidArrowLine} />
-              <ArrowDown size={20} />
-              <span
-                style={{
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  color: 'var(--color-text-muted)',
-                  marginTop: '2px',
-                }}
-              >
-                Mentors &amp; Sharpens
-              </span>
-              <div style={styles.pyramidArrowLine} />
-            </div>
-
-            {/* Swordsmen */}
-            <div style={styles.pyramidTier}>
-              <div
-                style={{
-                  ...styles.pyramidBox,
-                  background: 'linear-gradient(135deg, #4a6fa5, #3a5a8a)',
-                  minWidth: '380px',
-                }}
-              >
-                <Sword size={22} />
-                Swordsmen
-              </div>
-              <div style={styles.pyramidLabel}>Mathetes — Disciple in Training</div>
+            {/* Level 3 */}
+            <div style={s.treeLevel}>
+              {treeData.level3.map((n, i) => (
+                <TreeNode key={i} label={n.label} name={n.name} />
+              ))}
             </div>
           </div>
         </div>
 
-        {/* ── Scripture Banner ────────────────── */}
-        <div style={styles.scriptureBanner}>
-          <p style={styles.scriptureText}>
-            "And the things you have heard me say in the presence of many
-            witnesses entrust to reliable people who will also be qualified to
-            teach others."
-          </p>
-          <p style={styles.scriptureRef}>— 2 Timothy 2:2</p>
+        {/* ── Verse Callout ────────────────────────────── */}
+        <div style={s.verseBox}>
+          <div style={s.verseEyebrow}>SCRIPTURE</div>
+          <div style={s.verseQuote}>
+            "Go therefore and make disciples of all nations, baptizing them in
+            the name of the Father and of the Son and of the Holy Spirit,
+            teaching them to observe all that I have commanded you. And behold,
+            I am with you always, to the end of the age."
+          </div>
+          <div style={s.verseRef}>&mdash; MATTHEW 28:19&ndash;20</div>
         </div>
       </div>
     </div>

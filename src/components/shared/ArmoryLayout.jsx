@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 
-/* ------------------------------------------------------------------ */
-/*  Sidebar link definitions                                           */
-/* ------------------------------------------------------------------ */
 const MEMBER_LINKS = [
   { label: 'Dashboard',        path: '/armory/dashboard',        icon: DashboardIcon },
   { label: 'Treasury',         path: '/armory/treasury',         icon: TreasuryIcon },
@@ -20,9 +18,6 @@ const ADMIN_LINKS = [
   { label: 'Relationships',  path: '/armory/admin/relationships', icon: RelationshipsIcon },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  Responsive stylesheet (injected once)                              */
-/* ------------------------------------------------------------------ */
 const STYLE_ID = 'hvk-armory-layout-responsive';
 if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
   const el = document.createElement('style');
@@ -65,31 +60,29 @@ if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
       }
     }
     .hvk-sidebar-link:hover {
-      background-color: rgba(220, 20, 60, 0.06) !important;
-      color: var(--color-primary) !important;
+      background-color: rgba(184, 28, 44, 0.08) !important;
+      color: var(--crimson) !important;
     }
     .hvk-signout-btn:hover {
-      background-color: rgba(220, 20, 60, 0.08) !important;
+      background-color: rgba(184, 28, 44, 0.08) !important;
+    }
+    .hvk-theme-toggle-armory:hover {
+      border-color: var(--crimson) !important;
+      color: var(--crimson) !important;
     }
   `;
   document.head.appendChild(el);
 }
 
-/* ------------------------------------------------------------------ */
-/*  Component                                                          */
-/* ------------------------------------------------------------------ */
 export default function ArmoryLayout() {
   const { profile, signOut, isAdmin, isEdgeKeeper } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  /* close sidebar on route change (mobile) */
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [location.pathname]);
+  useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
-  /* lock scroll when mobile sidebar is open */
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') setSidebarOpen(false); };
     if (sidebarOpen) {
@@ -115,14 +108,12 @@ export default function ArmoryLayout() {
     }
   }
 
-  /* user display values */
   const displayName = profile?.display_name || profile?.username || 'Member';
   const avatarLetter = displayName.charAt(0).toUpperCase();
   const userRole = profile?.user_role || 'Member';
 
   return (
     <div style={s.layout}>
-      {/* -------- Mobile top bar -------- */}
       <div className="hvk-armory-toggle" style={s.mobileTopBar}>
         <button
           style={s.toggleBtn}
@@ -131,22 +122,25 @@ export default function ArmoryLayout() {
           aria-expanded={sidebarOpen}
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M3 6h18M3 12h18M3 18h18" stroke="var(--color-text)" strokeWidth="2" strokeLinecap="round" />
+            <path d="M3 6h18M3 12h18M3 18h18" stroke="var(--parchment)" strokeWidth="2" strokeLinecap="round" />
           </svg>
         </button>
         <Link to="/armory/dashboard" style={s.mobileTitle}>
-          <svg style={{ width: 20, height: 20, flexShrink: 0 }} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M2 20h20v2H2v-2zm1-7l4 5h10l4-5-3-6-4 4-3-7-3 7-4-4-1 6z" fill="var(--color-primary)" />
-          </svg>
-          <span style={{ color: 'var(--color-primary)', fontWeight: 700, fontSize: '18px', letterSpacing: '1px' }}>
-            The Armory
+          <img src="/hvklogo.png" alt="HVK" style={{ width: 28, height: 28, objectFit: 'contain' }} />
+          <span style={{ color: 'var(--crimson)', fontWeight: 700, fontSize: '14px', letterSpacing: '3px', fontFamily: "'Cinzel', serif" }}>
+            THE ARMORY
           </span>
         </Link>
-        {/* spacer to balance hamburger */}
-        <div style={{ width: '44px' }} />
+        <button
+          className="hvk-theme-toggle-armory"
+          onClick={toggleTheme}
+          aria-label="Toggle theme"
+          style={s.themeToggleMobile}
+        >
+          {theme === 'dark' ? '☽' : '☀'}
+        </button>
       </div>
 
-      {/* -------- Mobile overlay -------- */}
       <div
         className={`hvk-armory-overlay${sidebarOpen ? ' open' : ''}`}
         style={s.overlay}
@@ -154,33 +148,23 @@ export default function ArmoryLayout() {
         aria-hidden="true"
       />
 
-      {/* -------- Sidebar -------- */}
       <aside
         className={`hvk-armory-sidebar${sidebarOpen ? ' open' : ''}`}
         style={s.sidebar}
         aria-label="Armory sidebar navigation"
       >
-        {/* Sidebar header: user info */}
         <div style={s.sidebarHeader}>
           <Link to="/" style={s.sidebarLogoLink} aria-label="Back to public site">
-            <svg style={{ width: 22, height: 22 }} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M2 20h20v2H2v-2zm1-7l4 5h10l4-5-3-6-4 4-3-7-3 7-4-4-1 6z" fill="var(--color-primary)" />
-            </svg>
+            <img src="/hvklogo.png" alt="HVK" style={{ width: 28, height: 28, objectFit: 'contain' }} />
             <span style={s.sidebarLogoText}>The Armory</span>
           </Link>
         </div>
 
         <div style={s.userCard}>
           {profile?.avatar_url ? (
-            <img
-              src={profile.avatar_url}
-              alt={displayName}
-              style={s.avatar}
-            />
+            <img src={profile.avatar_url} alt={displayName} style={s.avatar} />
           ) : (
-            <div style={s.avatarFallback} aria-hidden="true">
-              {avatarLetter}
-            </div>
+            <div style={s.avatarFallback} aria-hidden="true">{avatarLetter}</div>
           )}
           <div style={s.userInfo}>
             <p style={s.userName}>{displayName}</p>
@@ -188,11 +172,10 @@ export default function ArmoryLayout() {
           </div>
         </div>
 
-        {/* Nav links */}
         <nav style={s.sidebarNav}>
           <ul style={s.linkList}>
             {MEMBER_LINKS.map((link) => (
-              <li key={link.path}>
+              <li key={link.path} style={{ listStyle: 'none' }}>
                 <Link
                   to={link.path}
                   className="hvk-sidebar-link"
@@ -208,7 +191,6 @@ export default function ArmoryLayout() {
             ))}
           </ul>
 
-          {/* Admin section */}
           {(isAdmin || isEdgeKeeper) && (
             <>
               <div style={s.sectionDivider}>
@@ -216,7 +198,7 @@ export default function ArmoryLayout() {
               </div>
               <ul style={s.linkList}>
                 {ADMIN_LINKS.map((link) => (
-                  <li key={link.path}>
+                  <li key={link.path} style={{ listStyle: 'none' }}>
                     <Link
                       to={link.path}
                       className="hvk-sidebar-link"
@@ -235,8 +217,25 @@ export default function ArmoryLayout() {
           )}
         </nav>
 
-        {/* Sign out */}
         <div style={s.sidebarFooter}>
+          <button
+            className="hvk-theme-toggle-armory"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            style={s.themeToggle}
+          >
+            {theme === 'dark' ? (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="4"/>
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+              </svg>
+            )}
+            <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+          </button>
           <button
             className="hvk-signout-btn"
             style={s.signOutBtn}
@@ -248,7 +247,6 @@ export default function ArmoryLayout() {
         </div>
       </aside>
 
-      {/* -------- Main content -------- */}
       <main className="hvk-armory-main" style={s.main}>
         <div style={s.content}>
           <Outlet />
@@ -258,11 +256,8 @@ export default function ArmoryLayout() {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Inline SVG icon components                                         */
-/* ------------------------------------------------------------------ */
 function DashboardIcon({ active }) {
-  const color = active ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+  const color = active ? 'var(--crimson)' : 'var(--parchment-dim)';
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <rect x="3" y="3" width="7" height="9" rx="1" stroke={color} strokeWidth="1.8" />
@@ -274,7 +269,7 @@ function DashboardIcon({ active }) {
 }
 
 function TreasuryIcon({ active }) {
-  const color = active ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+  const color = active ? 'var(--crimson)' : 'var(--parchment-dim)';
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="12" r="8" stroke={color} strokeWidth="1.8" />
@@ -284,7 +279,7 @@ function TreasuryIcon({ active }) {
 }
 
 function ScriptureIcon({ active }) {
-  const color = active ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+  const color = active ? 'var(--crimson)' : 'var(--parchment-dim)';
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -294,7 +289,7 @@ function ScriptureIcon({ active }) {
 }
 
 function DisciplineIcon({ active }) {
-  const color = active ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+  const color = active ? 'var(--crimson)' : 'var(--parchment-dim)';
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M12 2L2 7l10 5 10-5-10-5z" stroke={color} strokeWidth="1.8" strokeLinejoin="round" />
@@ -305,7 +300,7 @@ function DisciplineIcon({ active }) {
 }
 
 function StatsIcon({ active }) {
-  const color = active ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+  const color = active ? 'var(--crimson)' : 'var(--parchment-dim)';
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path d="M18 20V10M12 20V4M6 20v-6" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
@@ -314,7 +309,7 @@ function StatsIcon({ active }) {
 }
 
 function ProfileIcon({ active }) {
-  const color = active ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+  const color = active ? 'var(--crimson)' : 'var(--parchment-dim)';
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="8" r="4" stroke={color} strokeWidth="1.8" />
@@ -324,7 +319,7 @@ function ProfileIcon({ active }) {
 }
 
 function ManageUsersIcon({ active }) {
-  const color = active ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+  const color = active ? 'var(--crimson)' : 'var(--parchment-dim)';
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="9" cy="7" r="3.5" stroke={color} strokeWidth="1.8" />
@@ -335,7 +330,7 @@ function ManageUsersIcon({ active }) {
 }
 
 function AwardCoinsIcon({ active }) {
-  const color = active ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+  const color = active ? 'var(--crimson)' : 'var(--parchment-dim)';
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="12" r="9" stroke={color} strokeWidth="1.8" />
@@ -346,7 +341,7 @@ function AwardCoinsIcon({ active }) {
 }
 
 function RelationshipsIcon({ active }) {
-  const color = active ? 'var(--color-primary)' : 'var(--color-text-secondary)';
+  const color = active ? 'var(--crimson)' : 'var(--parchment-dim)';
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="7" cy="9" r="3" stroke={color} strokeWidth="1.8" />
@@ -360,33 +355,31 @@ function RelationshipsIcon({ active }) {
 function SignOutIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="var(--color-text-secondary)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M16 17l5-5-5-5M21 12H9" stroke="var(--color-text-secondary)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="var(--parchment-dim)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M16 17l5-5-5-5M21 12H9" stroke="var(--parchment-dim)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Inline style objects                                               */
-/* ------------------------------------------------------------------ */
 const SIDEBAR_WIDTH = '260px';
 
 const s = {
   layout: {
     display: 'flex',
     minHeight: '100vh',
-    backgroundColor: 'var(--color-bg-alt)',
+    backgroundColor: 'var(--field-bg)',
+    backgroundImage: 'var(--field-bg-image)',
+    backgroundAttachment: 'fixed',
   },
-
-  /* mobile top bar */
   mobileTopBar: {
     position: 'fixed',
     top: 0,
     left: 0,
     right: 0,
     height: 'var(--header-height)',
-    backgroundColor: 'var(--color-bg)',
-    borderBottom: '1px solid var(--color-border)',
+    backgroundColor: 'var(--nav-bg)',
+    backdropFilter: 'blur(8px)',
+    borderBottom: '1px solid var(--rule-soft-2)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -402,8 +395,6 @@ const s = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    borderRadius: 'var(--radius-sm)',
-    WebkitTapHighlightColor: 'transparent',
   },
   mobileTitle: {
     display: 'flex',
@@ -411,25 +402,29 @@ const s = {
     gap: '8px',
     textDecoration: 'none',
   },
-
-  /* overlay */
+  themeToggleMobile: {
+    background: 'none',
+    border: '1px solid var(--rule-soft)',
+    color: 'var(--parchment-dim)',
+    padding: '6px 10px',
+    fontSize: '14px',
+    cursor: 'pointer',
+  },
   overlay: {
     display: 'none',
     position: 'fixed',
     inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     zIndex: 1099,
   },
-
-  /* sidebar */
   sidebar: {
     width: SIDEBAR_WIDTH,
     minWidth: SIDEBAR_WIDTH,
     height: '100vh',
     position: 'sticky',
     top: 0,
-    backgroundColor: 'var(--color-bg)',
-    borderRight: '1px solid var(--color-border)',
+    backgroundColor: 'var(--anvil)',
+    borderRight: '1px solid var(--rule)',
     display: 'flex',
     flexDirection: 'column',
     overflowY: 'auto',
@@ -441,23 +436,22 @@ const s = {
   sidebarLogoLink: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '10px',
     textDecoration: 'none',
   },
   sidebarLogoText: {
-    fontSize: '17px',
+    fontSize: '15px',
     fontWeight: 700,
-    color: 'var(--color-primary)',
-    letterSpacing: '0.5px',
+    color: 'var(--crimson)',
+    letterSpacing: '2px',
+    fontFamily: "'Cinzel', serif",
   },
-
-  /* user card */
   userCard: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
     padding: '20px',
-    borderBottom: '1px solid var(--color-border)',
+    borderBottom: '1px solid var(--rule)',
   },
   avatar: {
     width: '40px',
@@ -470,14 +464,15 @@ const s = {
     width: '40px',
     height: '40px',
     borderRadius: '50%',
-    backgroundColor: 'var(--color-primary)',
-    color: '#fff',
+    backgroundColor: 'var(--crimson)',
+    color: '#F4E8D0',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '16px',
     fontWeight: 700,
     flexShrink: 0,
+    fontFamily: "'Cinzel', serif",
   },
   userInfo: {
     overflow: 'hidden',
@@ -485,19 +480,21 @@ const s = {
   userName: {
     fontSize: '14px',
     fontWeight: 600,
-    color: 'var(--color-text)',
+    color: 'var(--parchment)',
     margin: 0,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    fontFamily: "'Cinzel', serif",
   },
   userRole: {
-    fontSize: '12px',
-    color: 'var(--color-text-muted)',
+    fontSize: '11px',
+    color: 'var(--parchment-dim)',
     margin: 0,
+    fontFamily: "'JetBrains Mono', monospace",
+    letterSpacing: '1px',
+    textTransform: 'uppercase',
   },
-
-  /* nav */
   sidebarNav: {
     flex: 1,
     padding: '12px 0',
@@ -514,35 +511,52 @@ const s = {
     padding: '10px 20px',
     fontSize: '14px',
     fontWeight: 500,
-    color: 'var(--color-text-secondary)',
+    color: 'var(--parchment-dim)',
     textDecoration: 'none',
     borderLeft: '3px solid transparent',
     transition: 'color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease',
+    fontFamily: "'EB Garamond', serif",
   },
   sidebarLinkActive: {
-    color: 'var(--color-primary)',
+    color: 'var(--crimson)',
     fontWeight: 600,
-    backgroundColor: 'rgba(220,20,60,0.06)',
-    borderLeftColor: 'var(--color-primary)',
+    backgroundColor: 'rgba(184, 28, 44, 0.08)',
+    borderLeftColor: 'var(--crimson)',
   },
-
-  /* admin section divider */
   sectionDivider: {
     padding: '16px 20px 8px',
   },
   sectionLabel: {
-    fontSize: '11px',
+    fontSize: '10px',
     fontWeight: 700,
-    color: 'var(--color-text-muted)',
+    color: 'var(--crimson)',
     textTransform: 'uppercase',
-    letterSpacing: '0.8px',
+    letterSpacing: '2px',
+    fontFamily: "'JetBrains Mono', monospace",
   },
-
-  /* sidebar footer */
   sidebarFooter: {
     padding: '12px 16px 20px',
-    borderTop: '1px solid var(--color-border)',
+    borderTop: '1px solid var(--rule)',
     marginTop: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
+  themeToggle: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    width: '100%',
+    padding: '10px 12px',
+    fontSize: '12px',
+    fontWeight: 500,
+    color: 'var(--parchment-dim)',
+    background: 'none',
+    border: '1px solid var(--rule-soft)',
+    cursor: 'pointer',
+    fontFamily: "'JetBrains Mono', monospace",
+    letterSpacing: '1px',
+    transition: 'border-color 0.15s ease, color 0.15s ease',
   },
   signOutBtn: {
     display: 'flex',
@@ -552,15 +566,13 @@ const s = {
     padding: '10px 12px',
     fontSize: '14px',
     fontWeight: 500,
-    color: 'var(--color-text-secondary)',
+    color: 'var(--parchment-dim)',
     background: 'none',
     border: 'none',
-    borderRadius: 'var(--radius-sm)',
     cursor: 'pointer',
     transition: 'background-color 0.15s ease',
+    fontFamily: "'EB Garamond', serif",
   },
-
-  /* main content */
   main: {
     flex: 1,
     minWidth: 0,

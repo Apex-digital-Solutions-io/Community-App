@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
 
 const NAV_LINKS = [
   { label: 'Home', path: '/' },
   { label: 'Schedule', path: '/schedule' },
   { label: 'Roles', path: '/roles' },
-  { label: 'Gamification', path: '/gamification' },
+  { label: 'Accountability', path: '/accountability' },
   { label: 'The Armory', path: '/armory' },
   { label: 'Resources', path: '/resources' },
 ];
 
-/* ---------- responsive stylesheet (injected once) ---------- */
 const STYLE_ID = 'hvk-navbar-responsive';
 if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
   const el = document.createElement('style');
@@ -18,41 +18,62 @@ if (typeof document !== 'undefined' && !document.getElementById(STYLE_ID)) {
   el.textContent = `
     .hvk-nav-desktop { display: flex; }
     .hvk-nav-hamburger { display: none; }
-    @media (max-width: 768px) {
+    .hvk-theme-toggle-nav { display: inline-flex; }
+    @media (max-width: 900px) {
       .hvk-nav-desktop { display: none !important; }
       .hvk-nav-hamburger { display: flex !important; }
     }
     .hvk-nav-link:hover {
-      color: var(--color-primary) !important;
-      background-color: rgba(220, 20, 60, 0.04);
+      color: var(--parchment) !important;
+      border-bottom-color: var(--crimson) !important;
     }
     .hvk-mobile-link:hover {
-      color: var(--color-primary) !important;
-      background-color: rgba(220, 20, 60, 0.06);
+      color: var(--parchment) !important;
+      background-color: rgba(184, 28, 44, 0.08);
+    }
+    .navbar-crimson-line {
+      position: absolute;
+      left: 0; right: 0; bottom: -1px;
+      height: 2px;
+      background: var(--crimson);
+      opacity: 0.85;
     }
   `;
   document.head.appendChild(el);
 }
 
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button
+      onClick={toggleTheme}
+      aria-label="Toggle theme"
+      style={s.themeToggle}
+    >
+      {theme === 'dark' ? (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      ) : (
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+      )}
+      <span>{theme === 'dark' ? 'Light' : 'Dark'}</span>
+    </button>
+  );
+}
+
+export { ThemeToggle };
+
 export default function Navbar() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const menuRef = useRef(null);
 
-  /* track scroll for shadow effect */
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  useEffect(() => { setMobileOpen(false); }, [location.pathname]);
 
-  /* close mobile menu on route change */
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [location.pathname]);
-
-  /* lock body scroll & handle Escape key when menu is open */
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') setMobileOpen(false); };
     if (mobileOpen) {
@@ -72,33 +93,35 @@ export default function Navbar() {
 
   return (
     <>
-      <header
-        style={{
-          ...s.header,
-          boxShadow: scrolled ? 'var(--shadow-md)' : 'none',
-        }}
-      >
+      <header style={s.header}>
+        <div className="navbar-crimson-line" />
         <nav style={s.nav}>
-          {/* -------- Logo -------- */}
           <Link to="/" style={s.logoLink} aria-label="HVK Home">
-            <svg
-              style={s.crownIcon}
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M2 20h20v2H2v-2zm1-7l4 5h10l4-5-3-6-4 4-3-7-3 7-4-4-1 6z"
-                fill="var(--color-primary)"
-              />
-            </svg>
-            <span style={s.logoText}>HVK</span>
+            <div style={s.logoIcon}>
+              <img src="/hvklogo.png" alt="HVK" style={s.logoImg} />
+            </div>
+            <span style={s.logoText}>
+              HIDDEN VALLEY <span style={s.logoAccent}>KINGS</span>
+            </span>
           </Link>
 
-          {/* -------- Desktop links -------- */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <ThemeToggle />
+
+            <button
+              className="hvk-nav-hamburger"
+              style={s.hamburger}
+              onClick={() => setMobileOpen((v) => !v)}
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileOpen}
+            >
+              ≡
+            </button>
+          </div>
+
           <ul className="hvk-nav-desktop" style={s.desktopLinks}>
             {NAV_LINKS.map((link) => (
-              <li key={link.path}>
+              <li key={link.path} style={{ listStyle: 'none' }}>
                 <Link
                   to={link.path}
                   className="hvk-nav-link"
@@ -108,55 +131,18 @@ export default function Navbar() {
                   }}
                 >
                   {link.label}
-                  {isActive(link.path) && <span style={s.activeBar} />}
                 </Link>
               </li>
             ))}
           </ul>
-
-          {/* -------- Hamburger -------- */}
-          <button
-            className="hvk-nav-hamburger"
-            style={s.hamburger}
-            onClick={() => setMobileOpen((v) => !v)}
-            aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={mobileOpen}
-            aria-controls="hvk-mobile-menu"
-          >
-            <span
-              style={{
-                ...s.bar,
-                transform: mobileOpen ? 'translateY(7px) rotate(45deg)' : 'none',
-              }}
-            />
-            <span
-              style={{
-                ...s.bar,
-                opacity: mobileOpen ? 0 : 1,
-              }}
-            />
-            <span
-              style={{
-                ...s.bar,
-                transform: mobileOpen ? 'translateY(-7px) rotate(-45deg)' : 'none',
-              }}
-            />
-          </button>
         </nav>
       </header>
 
-      {/* -------- Mobile overlay -------- */}
       {mobileOpen && (
-        <div
-          style={s.overlay}
-          onClick={() => setMobileOpen(false)}
-          aria-hidden="true"
-        />
+        <div style={s.overlay} onClick={() => setMobileOpen(false)} aria-hidden="true" />
       )}
 
-      {/* -------- Mobile slide-out menu -------- */}
       <aside
-        id="hvk-mobile-menu"
         ref={menuRef}
         style={{
           ...s.mobileMenu,
@@ -167,7 +153,7 @@ export default function Navbar() {
       >
         <ul style={s.mobileList}>
           {NAV_LINKS.map((link) => (
-            <li key={link.path}>
+            <li key={link.path} style={{ listStyle: 'none' }}>
               <Link
                 to={link.path}
                 className="hvk-mobile-link"
@@ -188,148 +174,142 @@ export default function Navbar() {
   );
 }
 
-/* ---------- inline style objects ---------- */
 const s = {
   header: {
-    position: 'sticky',
+    position: 'fixed',
     top: 0,
+    left: 0,
+    right: 0,
+    background: 'var(--nav-bg)',
+    backdropFilter: 'blur(8px)',
+    borderBottom: '1px solid var(--rule-soft-2)',
     zIndex: 1000,
-    backgroundColor: 'var(--color-bg)',
-    borderBottom: '1px solid var(--color-border)',
-    height: 'var(--header-height)',
-    minHeight: 'var(--header-height)',
-    flexShrink: 0,
-    transition: 'box-shadow 0.2s ease',
+    height: '84px',
+    minHeight: '84px',
   },
   nav: {
-    maxWidth: 'var(--max-width)',
+    maxWidth: '1240px',
     margin: '0 auto',
-    padding: '0 24px',
+    padding: '0 32px',
     height: '100%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-
-  /* logo */
   logoLink: {
     display: 'flex',
     alignItems: 'center',
-    gap: '8px',
+    gap: '14px',
     textDecoration: 'none',
+    color: 'var(--parchment)',
   },
-  crownIcon: {
-    width: '28px',
-    height: '28px',
-    flexShrink: 0,
+  logoIcon: {
+    width: '44px',
+    height: '44px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  logoImg: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'contain',
   },
   logoText: {
-    fontSize: '24px',
-    fontWeight: 800,
-    color: 'var(--color-primary)',
-    letterSpacing: '2px',
-    fontFamily: 'var(--font-family)',
+    fontFamily: "'Cinzel', serif",
+    fontSize: '16px',
+    fontWeight: 700,
+    letterSpacing: '4px',
+    color: 'var(--parchment)',
   },
-
-  /* desktop links */
+  logoAccent: {
+    color: 'var(--crimson)',
+  },
   desktopLinks: {
     alignItems: 'center',
-    gap: '4px',
-    listStyle: 'none',
+    gap: '28px',
     margin: 0,
     padding: 0,
   },
   navLink: {
-    position: 'relative',
-    display: 'inline-flex',
-    alignItems: 'center',
-    padding: '8px 16px',
-    fontSize: '15px',
-    fontWeight: 500,
-    color: 'var(--color-text-secondary)',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '11px',
+    letterSpacing: '2.5px',
+    textTransform: 'uppercase',
+    color: 'var(--parchment-dim)',
     textDecoration: 'none',
-    borderRadius: 'var(--radius-sm)',
-    transition: 'color 0.2s ease, background-color 0.2s ease',
+    padding: '6px 0',
+    borderBottom: '1px solid transparent',
+    transition: 'color 0.15s ease, border-color 0.15s ease',
   },
   navLinkActive: {
-    color: 'var(--color-primary)',
-    fontWeight: 600,
+    color: 'var(--parchment)',
+    borderBottomColor: 'var(--crimson)',
   },
-  activeBar: {
-    position: 'absolute',
-    bottom: '-2px',
-    left: '16px',
-    right: '16px',
-    height: '2px',
-    backgroundColor: 'var(--color-primary)',
-    borderRadius: '1px',
-  },
-
-  /* hamburger */
-  hamburger: {
-    flexDirection: 'column',
-    justifyContent: 'center',
+  themeToggle: {
+    display: 'inline-flex',
     alignItems: 'center',
-    gap: '5px',
-    width: '44px',
-    height: '44px',
-    padding: '8px',
-    background: 'none',
-    border: 'none',
+    gap: '8px',
+    background: 'transparent',
+    border: '1px solid var(--rule-soft)',
+    color: 'var(--ink)',
+    padding: '6px 12px',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '10px',
+    letterSpacing: '2.5px',
+    textTransform: 'uppercase',
     cursor: 'pointer',
-    borderRadius: 'var(--radius-sm)',
-    WebkitTapHighlightColor: 'transparent',
+    transition: 'border-color 0.15s ease, color 0.15s ease',
   },
-  bar: {
-    display: 'block',
-    width: '22px',
-    height: '2px',
-    backgroundColor: 'var(--color-text)',
-    borderRadius: '1px',
-    transition: 'transform 0.3s ease, opacity 0.3s ease',
-    transformOrigin: 'center',
+  hamburger: {
+    background: 'none',
+    border: '1px solid var(--rule-soft)',
+    color: 'var(--parchment)',
+    fontSize: '20px',
+    padding: '6px 12px',
+    cursor: 'pointer',
+    fontFamily: "'JetBrains Mono', monospace",
   },
-
-  /* mobile drawer */
   overlay: {
     position: 'fixed',
     inset: 0,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     zIndex: 1001,
   },
   mobileMenu: {
     position: 'fixed',
-    top: 0,
+    top: '84px',
+    left: 0,
     right: 0,
-    bottom: 0,
-    width: '280px',
-    maxWidth: '80vw',
-    backgroundColor: 'var(--color-bg)',
+    backgroundColor: 'var(--onyx)',
     zIndex: 1002,
     transition: 'transform 0.3s ease, visibility 0.3s ease',
-    paddingTop: 'var(--header-height)',
+    borderBottom: '1px solid var(--crimson)',
     overflowY: 'auto',
-    boxShadow: 'var(--shadow-lg)',
+    maxHeight: 'calc(100vh - 84px)',
   },
   mobileList: {
-    listStyle: 'none',
     margin: 0,
-    padding: '16px 0',
+    padding: '24px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '18px',
   },
   mobileLink: {
-    display: 'block',
-    padding: '14px 24px',
-    fontSize: '16px',
-    fontWeight: 500,
-    color: 'var(--color-text-secondary)',
+    fontFamily: "'JetBrains Mono', monospace",
+    fontSize: '11px',
+    letterSpacing: '2.5px',
+    textTransform: 'uppercase',
+    color: 'var(--parchment-dim)',
     textDecoration: 'none',
-    borderLeft: '3px solid transparent',
-    transition: 'color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease',
+    padding: '6px 0',
+    borderBottom: '1px solid transparent',
+    transition: 'color 0.15s ease, border-color 0.15s ease',
+    display: 'block',
   },
   mobileLinkActive: {
-    color: 'var(--color-primary)',
-    fontWeight: 600,
-    backgroundColor: 'rgba(220,20,60,0.06)',
-    borderLeftColor: 'var(--color-primary)',
+    color: 'var(--parchment)',
+    borderBottomColor: 'var(--crimson)',
   },
 };

@@ -1,0 +1,117 @@
+/* ══════════════════════════════════════════════════════
+   HVK Design System · Theme Variables
+   ══════════════════════════════════════════════════════ */
+
+:root,
+:root[data-theme="dark"] {
+  /* ── Core palette ─────────────────────────────────── */
+  --onyx: #0E0E0E;
+  --onyx-deep: #0a0908;
+  --anvil: #1A1A1A;
+  --crimson: #B81C2C;
+  --crimson-dark: #7A0F1A;
+  --parchment: #F4E8D0;
+  --parchment-light: #FAF3E3;
+  --parchment-dim: #C9B68A;
+  --gold: #B8860B;
+  --rule: #3D2817;
+  --rule-soft: rgba(244, 232, 208, 0.25);
+  --rule-soft-2: rgba(244, 232, 208, 0.12);
+
+  /* ── Semantic tokens ───────���──────────────────────── */
+  --field-bg: #0E0E0E;
+  --field-bg-deep: #0a0908;
+  --card-bg: #1A1A1A;
+  --soft-bg: #1A1A1A;
+  --ink: #F4E8D0;
+  --ink-dim: #C9B68A;
+  --box-border: #3D2817;
+  --nav-bg: rgba(14, 14, 14, 0.96);
+  --display-shadow: 0 2px 0 rgba(0,0,0,0.5);
+  --stamp-bg: #F4E8D0;
+  --stamp-ink: #1A1A1A;
+  --field-bg-image:
+    radial-gradient(ellipse at 20% 15%, rgba(184,28,44,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 85%, rgba(255,255,255,0.02) 0%, transparent 55%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.2) 0 1px, transparent 1px 5px);
+
+  /* ── Font stacks ──────────────────────────────────── */
+  --font-display: 'Cinzel', serif;
+  --font-body: 'EB Garamond', Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-accent: 'Cormorant Garamond', serif;
+
+  /* ── Legacy aliases (Armory pages depend on these) ── */
+  --color-primary: #B81C2C;
+  --color-primary-dark: #7A0F1A;
+  --color-primary-light: #d42a3c;
+  --color-bg: #0E0E0E;
+  --color-bg-alt: #1A1A1A;
+  --color-bg-dark: #050505;
+  --color-text: #F4E8D0;
+  --color-text-secondary: #C9B68A;
+  --color-text-muted: #8a7e6a;
+  --color-border: rgba(244, 232, 208, 0.12);
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  --font-family: 'EB Garamond', Georgia, serif;
+  --max-width: 1200px;
+  --header-height: 84px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+:root[data-theme="light"] {
+  /* ── Core palette overrides ───────────────────────── */
+  --onyx: #F4E8D0;
+  --onyx-deep: #EFE0C2;
+  --anvil: #FAF3E3;
+  --crimson: #B81C2C;
+  --crimson-dark: #7A0F1A;
+  --parchment: #1A1A1A;
+  --parchment-light: #FAF3E3;
+  --parchment-dim: #7A5A3A;
+  --gold: #B8860B;
+  --rule: rgba(26, 26, 26, 0.4);
+  --rule-soft: rgba(26, 26, 26, 0.3);
+  --rule-soft-2: rgba(26, 26, 26, 0.15);
+
+  /* ── Semantic overrides ───────────────────────────── */
+  --field-bg: #F4E8D0;
+  --field-bg-deep: #EFE0C2;
+  --card-bg: #FAF3E3;
+  --soft-bg: #FAF3E3;
+  --ink: #1A1A1A;
+  --ink-dim: #7A5A3A;
+  --box-border: #1A1A1A;
+  --nav-bg: rgba(244, 232, 208, 0.96);
+  --display-shadow: none;
+  --stamp-bg: #1A1A1A;
+  --stamp-ink: #F4E8D0;
+  --field-bg-image:
+    radial-gradient(ellipse at 20% 15%, rgba(120,90,40,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 85%, rgba(120,90,40,0.08) 0%, transparent 55%),
+    repeating-linear-gradient(0deg, rgba(60,40,20,0.015) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(60,40,20,0.012) 0 1px, transparent 1px 4px);
+
+  /* ── Legacy aliases ───────────────────────────────── */
+  --color-primary: #B81C2C;
+  --color-primary-dark: #7A0F1A;
+  --color-primary-light: #d42a3c;
+  --color-bg: #F4E8D0;
+  --color-bg-alt: #FAF3E3;
+  --color-bg-dark: #EFE0C2;
+  --color-text: #1A1A1A;
+  --color-text-secondary: #7A5A3A;
+  --color-text-muted: #8a7e6a;
+  --color-border: rgba(26, 26, 26, 0.15);
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+}

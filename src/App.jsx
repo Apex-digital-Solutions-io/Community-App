@@ -11,7 +11,7 @@ import ProtectedRoute from './components/shared/ProtectedRoute';
 const HomePage = lazy(() => import('./pages/public/HomePage'));
 const SchedulePage = lazy(() => import('./pages/public/SchedulePage'));
 const RolesPage = lazy(() => import('./pages/public/RolesPage'));
-const GamificationPage = lazy(() => import('./pages/public/GamificationPage'));
+const AccountabilityPage = lazy(() => import('./pages/public/AccountabilityPage'));
 const ResourcesPage = lazy(() => import('./pages/public/ResourcesPage'));
 
 // Auth pages
@@ -32,7 +32,7 @@ const AwardCoinsPage = lazy(() => import('./pages/admin/AwardCoinsPage'));
 const RelationshipsPage = lazy(() => import('./pages/admin/RelationshipsPage'));
 
 const PageLoader = () => (
-  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh', color: 'var(--color-text-secondary)' }}>
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '40vh', color: 'var(--parchment-dim)' }}>
     Loading...
   </div>
 );
@@ -46,11 +46,14 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="schedule" element={<SchedulePage />} />
           <Route path="roles" element={<RolesPage />} />
-          <Route path="gamification" element={<GamificationPage />} />
+          <Route path="accountability" element={<AccountabilityPage />} />
           <Route path="resources" element={<ResourcesPage />} />
         </Route>
 
-        {/* Auth routes (no layout wrapper needed — standalone pages) */}
+        {/* Redirect old gamification route */}
+        <Route path="gamification" element={<Navigate to="/accountability" replace />} />
+
+        {/* Auth routes */}
         <Route path="armory/login" element={<LoginPage />} />
         <Route path="armory/register" element={<RegisterPage />} />
 
